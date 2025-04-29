@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="CodeDesignPlus.Net.Exceptions" Version="0.7.0-beta.10" />
+    <PackageReference Include="CodeDesignPlus.Net.File.Storage" Version="0.7.0-beta.8" />
+    <PackageReference Include="CodeDesignPlus.Net.Mongo" Version="0.7.0-beta.9" /> 
+  </ItemGroup>
+</Project>
