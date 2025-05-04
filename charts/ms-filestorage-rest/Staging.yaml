@@ -106,6 +106,6 @@ ms-base:
         uri: /
       route:
       - destination:
-          host: ms-filestorage-rest.default.svc.cluster.local
+          host: ms-filestorage-rest.urbancore.svc.cluster.local
           port:
             number: 5000

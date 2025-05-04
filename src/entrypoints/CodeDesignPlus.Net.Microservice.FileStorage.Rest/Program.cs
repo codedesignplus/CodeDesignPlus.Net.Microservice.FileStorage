@@ -1,4 +1,5 @@
 using CodeDesignPlus.Net.File.Storage.Extensions;
+using CodeDesignPlus.Net.Microservice.Commons.Application;
 using CodeDesignPlus.Net.Microservice.Commons.EntryPoints.Rest.Middlewares;
 using CodeDesignPlus.Net.Microservice.Commons.EntryPoints.Rest.Resources;
 using CodeDesignPlus.Net.Microservice.Commons.EntryPoints.Rest.Swagger;
@@ -47,6 +48,7 @@ app.UseCors(builder => builder
     .AllowAnyMethod()
     .AllowAnyHeader()
 );
+app.UsePath();
 app.UseExceptionMiddleware();
 app.UseHealthChecks();
 app.UseCodeErrors();
