@@ -1,3 +1,5 @@
+using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.DataTransferObjects;
+
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Rest.Controllers;
 
 [Route("api/[controller]")]
@@ -37,14 +39,14 @@ public class FileStorageController(IMediator mediator) : ControllerBase
     }
 
     [HttpPost("[action]")]
-    public async Task<IActionResult> Upload([FromForm] Guid id, [FromForm] IFormFile file, [FromForm] string target, [FromForm] bool renowned, CancellationToken cancellationToken)
+    public async Task<IActionResult> Upload([FromForm] FileUploadDto data, IFormFile file, CancellationToken cancellationToken)
     {
         if (file == null || file.Length == 0)
         {
             return BadRequest("No file uploaded.");
         }
 
-        var command = new CreateFileStorageCommand(id, file.OpenReadStream(), file.FileName, target, renowned);
+        var command = new CreateFileStorageCommand(data.Id, file.OpenReadStream(), file.FileName, data.Target, data.Renowned);
 
         await mediator.Send(command, cancellationToken);
 
