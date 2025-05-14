@@ -81,7 +81,12 @@ public class FileStorageControllerTest
         fileMock.Setup(f => f.Length).Returns(1);
 
         // Act
-        var result = await controller.Upload(id, fileMock.Object, target, renowned, cancellationToken);
+        var result = await controller.Upload(new FileUploadDto()
+        {
+            Id = id,
+            Renowned = renowned,
+            Target = target,
+        }, fileMock.Object, cancellationToken);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
@@ -99,7 +104,12 @@ public class FileStorageControllerTest
         var cancellationToken = CancellationToken.None;
 
         // Act
-        var result = await controller.Upload(id, file, target, renowned, cancellationToken);
+        var result = await controller.Upload(new FileUploadDto()
+        {
+            Id = id,
+            Renowned = renowned,
+            Target = target,
+        }, file, cancellationToken);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
@@ -119,7 +129,12 @@ public class FileStorageControllerTest
         fileMock.Setup(f => f.Length).Returns(0);
 
         // Act
-        var result = await controller.Upload(id, fileMock.Object, target, renowned, cancellationToken);
+        var result = await controller.Upload(new FileUploadDto()
+        {
+            Id = id,
+            Renowned = renowned,
+            Target = target,
+        }, fileMock.Object, cancellationToken);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
