@@ -50,6 +50,6 @@ public class FileStorageController(IMediator mediator) : ControllerBase
 
         await mediator.Send(command, cancellationToken);
 
-        return Ok("File uploaded successfully.");
+        return Ok();
     }
 }
