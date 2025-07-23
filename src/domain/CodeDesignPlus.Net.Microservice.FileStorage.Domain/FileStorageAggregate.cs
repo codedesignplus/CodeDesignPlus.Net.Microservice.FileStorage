@@ -6,23 +6,21 @@ public class FileStorageAggregate(Guid id) : AggregateRoot(id)
     public string Target { get; private set; } = null!;
     public List<ValueObjects.File> Files { get; private set; } = [];
 
-    public bool IsDeleted { get; private set; } = false;
-
-    public FileStorageAggregate(Guid id, string file, string target, Guid tenant, Guid createdBy) : this(id)
-    {
-        Tenant = tenant;
-        CreatedBy = createdBy;
-        File = file;
-        Target = target;
-        IsActive = true;
-        CreatedAt = SystemClock.Instance.GetCurrentInstant();
-
-        this.AddEvent(FileStorageCreatedDomainEvent.Create(Id, File, Target, Tenant, CreatedBy));
-    }
-
     public static FileStorageAggregate Create(Guid id, string file, string target, Guid tenant, Guid createdBy)
     {
-        return new FileStorageAggregate(id, file, target, tenant, createdBy);
+        var aggregate = new FileStorageAggregate(id)
+        {
+            Tenant = tenant,
+            CreatedBy = createdBy,
+            File = file,
+            Target = target,
+            IsActive = true,
+            CreatedAt = SystemClock.Instance.GetCurrentInstant()
+        };
+
+        aggregate.AddEvent(FileStorageCreatedDomainEvent.Create(id, file, target, tenant, createdBy));
+
+        return aggregate;
     }
 
     public void AddFile(ValueObjects.File file, Guid updatedBy)
