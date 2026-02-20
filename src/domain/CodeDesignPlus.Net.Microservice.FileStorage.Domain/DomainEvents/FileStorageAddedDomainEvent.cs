@@ -1,7 +1,7 @@
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Domain.DomainEvents;
 
-[EventKey<FileStorageAggregate>(1, "FileStorageAddedDomainEvent")]
+[EventKey<FileStorageAggregate>(1, "FileStorageAddedDomainEvent", autoCreate: false)]
 public class FileStorageAddedDomainEvent(
      Guid aggregateId,
      ValueObjects.File file,
