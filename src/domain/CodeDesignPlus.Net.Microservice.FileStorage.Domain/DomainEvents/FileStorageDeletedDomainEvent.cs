@@ -1,6 +1,6 @@
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Domain.DomainEvents;
 
-[EventKey<FileStorageAggregate>(1, "FileStorageDeletedDomainEvent", autoCreate: false)]
+[EventKey<FileStorageAggregate>(1, "FileStorageDeletedDomainEvent")]
 public class FileStorageDeletedDomainEvent(
      Guid aggregateId,
     string file,
