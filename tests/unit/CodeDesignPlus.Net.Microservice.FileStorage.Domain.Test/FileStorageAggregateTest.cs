@@ -21,7 +21,7 @@ public class FileStorageAggregateTest
         var response = new File.Storage.Abstractions.Models.Response(file, TypeProviders.LocalProvider);
 
         this.metadata = Metadata.Create(file.Detail.File, file.Detail.Target, file.Detail.Uri, file.Detail.UriDownload, file.Detail.UriViewInBrowser, response.Provider);
-        this.fileDeatilValueObject = FileDetail.Create(file.Extension, file.FullName, file.Name, this.metadata, file.Size, file.Version.ToString(), file.Renowned, file.Mime);
+        this.fileDeatilValueObject = FileDetail.Create(file.Extension, file.FullName, file.Name, this.metadata, 2L, file.Version.ToString(), file.Renowned, file.Mime);
         this.fileValueObject = new Domain.ValueObjects.File(response.Success, response.Message, this.fileDeatilValueObject, response.Provider);
 
     }

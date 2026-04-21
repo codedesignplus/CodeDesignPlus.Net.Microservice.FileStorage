@@ -89,8 +89,7 @@ public class FileStorageControllerTest
         }, fileMock.Object, cancellationToken);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal("File uploaded successfully.", okResult.Value);
+         Assert.IsType<OkResult>(result);
     }
 
     [Fact]

@@ -9,6 +9,8 @@ public sealed partial class Metadata
     public string Target { get; private set; } = null!;
     public string UriDownload { get; private set; } = null!;
     public string UriViewInBrowser { get; private set; } = null!;
+    public Uri SignedUrl { get; set; }
+    public DateTime? SignedUrlExpiration { get; set; }
     public string Provider { get; private set; } = null!;
 
     public Metadata()

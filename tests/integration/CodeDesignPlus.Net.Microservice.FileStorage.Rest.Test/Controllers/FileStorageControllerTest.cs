@@ -1,3 +1,4 @@
+using CodeDesignPlus.Net.Core.Abstractions.Models.Pager;
 using NodaTime.Serialization.SystemTextJson;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Rest.Test.Controllers;
@@ -22,6 +23,7 @@ public class FileStorageControllerTest : ServerBase<Program>, IClassFixture<Serv
             x.Add("RabbitMQ:UserName", "guest");
             x.Add("RabbitMQ:Password", "guest");
             x.Add("Security:ValidAudiences:0", Guid.NewGuid().ToString());
+            x.Add("Security:ValidIssuer", "http://localhost");
             x.Add("FileStorage:AzureFile:Enable", "false");
             x.Add("FileStorage:AzureBlob:Enable", "false");
             x.Add("FileStorage:Local:Enable", "true");
@@ -41,12 +43,12 @@ public class FileStorageControllerTest : ServerBase<Program>, IClassFixture<Serv
 
         var json = await response.Content.ReadAsStringAsync();
 
-        var files = System.Text.Json.JsonSerializer.Deserialize<List<FileStorageDto>>(json, this.options)!;
+        var result = System.Text.Json.JsonSerializer.Deserialize<Pagination<FileStorageDto>>(json, this.options)!;
 
-        Assert.NotNull(files);
-        Assert.NotEmpty(files);
+        Assert.NotNull(result);
+        Assert.NotEmpty(result.Data);
 
-        var file = files.FirstOrDefault(x => x.Id == id);
+        var file = result.Data.FirstOrDefault(x => x.Id == id);
 
         Assert.NotNull(file);
         Assert.Equal(id, file.Id);

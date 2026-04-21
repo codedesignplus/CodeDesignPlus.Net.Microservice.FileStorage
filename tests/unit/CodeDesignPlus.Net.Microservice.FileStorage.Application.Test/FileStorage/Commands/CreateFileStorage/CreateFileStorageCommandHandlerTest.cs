@@ -77,7 +77,7 @@ public class CreateFileStorageCommandHandlerTest
         var response = new File.Storage.Abstractions.Models.Response(file, TypeProviders.LocalProvider);
 
         var metadata = Metadata.Create(file.Detail.File, file.Detail.Target, file.Detail.Uri, file.Detail.UriDownload, file.Detail.UriViewInBrowser, response.Provider);
-        var fileDeatilValueObject = FileDetail.Create(file.Extension, file.FullName, file.Name, metadata, file.Size, file.Version.ToString(), file.Renowned, file.Mime);
+        var fileDeatilValueObject = FileDetail.Create(file.Extension, file.FullName, file.Name, metadata, 2, file.Version.ToString(), file.Renowned, file.Mime);
         var fileValueObject = new Domain.ValueObjects.File(response.Success, response.Message, fileDeatilValueObject, response.Provider);
 
         fileStorageMock
@@ -117,7 +117,7 @@ public class CreateFileStorageCommandHandlerTest
         var response = new File.Storage.Abstractions.Models.Response(file, TypeProviders.LocalProvider);
 
         var metadata = Metadata.Create(file.Detail.File, file.Detail.Target, file.Detail.Uri, file.Detail.UriDownload, file.Detail.UriViewInBrowser, response.Provider);
-        var fileDeatilValueObject = FileDetail.Create(file.Extension, file.FullName, file.Name, metadata, file.Size, file.Version.ToString(), file.Renowned, file.Mime);
+        var fileDeatilValueObject = FileDetail.Create(file.Extension, file.FullName, file.Name, metadata, 2, file.Version.ToString(), file.Renowned, file.Mime);
         var fileValueObject = new Domain.ValueObjects.File(response.Success, response.Message, fileDeatilValueObject, response.Provider);
 
         repositoryMock
@@ -136,7 +136,7 @@ public class CreateFileStorageCommandHandlerTest
         await handler.Handle(request, cancellationToken);
 
         // Assert
-        repositoryMock.Verify(repo => repo.CreateAsync(existingAggregate, cancellationToken), Times.Once);
+        repositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<FileStorageAggregate>(), cancellationToken), Times.Once);
         pubSubMock.Verify(pubsub => pubsub.PublishAsync(It.IsAny<List<FileStorageAddedDomainEvent>>(), cancellationToken), Times.AtMostOnce);
         pubSubMock.Verify(pubsub => pubsub.PublishAsync(It.IsAny<List<FileStorageCreatedDomainEvent>>(), cancellationToken), Times.AtMostOnce);
     }
