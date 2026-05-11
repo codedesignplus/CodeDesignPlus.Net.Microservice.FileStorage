@@ -17,3 +17,4 @@ global using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage
 global using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Queries.GetFileStorageById;
 global using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Queries.GetAllFileStorage;
 global using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Queries.Download;
+global using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Queries.GetFileStorageWithSignedUrls;

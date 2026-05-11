@@ -11,6 +11,7 @@ public class CreateFileStorageCommandHandler(IFileStorageRepository repository, 
         ApplicationGuard.IsNull(request, Errors.InvalidRequest);
 
         var aggregate = await repository.FindAsync<FileStorageAggregate>(request.Id, user.Tenant, cancellationToken);
+        var isNew = aggregate == null;
 
         aggregate ??= FileStorageAggregate.Create(request.Id, request.File, request.Target, user.Tenant, user.IdUser);
 
@@ -26,7 +27,14 @@ public class CreateFileStorageCommandHandler(IFileStorageRepository repository, 
             }
         }
 
-        await repository.CreateAsync(aggregate, cancellationToken);
+        if (isNew)
+        {
+            await repository.CreateAsync(aggregate, cancellationToken);
+        }
+        else
+        {
+            await repository.UpdateAsync(aggregate, cancellationToken);
+        }
 
         await pubsub.PublishAsync(aggregate.GetAndClearEvents(), cancellationToken);
     }
