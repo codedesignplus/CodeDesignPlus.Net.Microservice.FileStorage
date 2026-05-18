@@ -34,6 +34,12 @@ A production-ready microservice for managing file uploads, downloads, and storag
 
 ## 🎯 Overview
 
+## What is this microservice?
+
+The FileStorage microservice stores and serves all files uploaded by users across the platform: photos of common areas, evidence attached to penalties, contract PDFs, unit inventories, assembly minutes, and user profile pictures. It solves the problem of abstracting cloud storage (Azure Blob, Azure File, or local) behind a single API so that other microservices only need to save a file ID and never worry about storage provider details or signed URLs. Administrators and residents upload files through the frontend, which streams them through this service, and any microservice that needs to display or download a file references it by ID.
+
+---
+
 The FileStorage microservice provides a unified API for file management operations across different storage providers. It abstracts the complexity of cloud storage interactions, offering features like:
 
 - **Multi-provider support**: Azure Blob Storage, Azure File Storage, Local File System
