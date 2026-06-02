@@ -11,6 +11,7 @@ using CodeDesignPlus.Net.Vault.Extensions;
 using NodaTime.Serialization.SystemTextJson;
 using NodaTime.Serialization.JsonNet;
 using CodeDesignPlus.Net.gRpc.Clients.Extensions;
+using CodeDesignPlus.Net.Hangfire.Extensions;
 
 
 var builder = WebApplication.CreateSlimBuilder(args);
@@ -48,6 +49,9 @@ builder.Services.AddHealthChecksServices();
 builder.Services.AddFileStorage(builder.Configuration);
 builder.Services.AddGrpcClients(builder.Configuration);
 
+// Hangfire - Auto-registra jobs recurrentes con [RecurringJobOptions]
+builder.Services.AddHangfire<Program>(builder.Configuration);
+
 var app = builder.Build();
 
 app.UseCors(builder => builder
@@ -67,6 +71,9 @@ app.UseHttpsRedirection();
 app.UseAuth();
 
 app.MapControllers().RequireAuthorization();
+
+// Hangfire - Monta el dashboard y registra jobs automáticamente
+app.UseHangfireDashboard<Program>(app.Configuration);
 
 await app.RunAsync();
 

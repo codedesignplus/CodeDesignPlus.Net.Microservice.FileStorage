@@ -1,4 +1,5 @@
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.DataTransferObjects;
+using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.DeactivateFileStorage;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Rest.Controllers;
 
@@ -182,5 +183,38 @@ public class FileStorageController(IMediator mediator) : ControllerBase
         await mediator.Send(command, cancellationToken);
 
         return Ok();
+    }
+
+    /// <summary>
+    /// Soft-deletes a file-storage record by marking it as inactive, without removing the physical files.
+    /// </summary>
+    /// <remarks>
+    /// This endpoint performs a soft delete: sets <c>IsActive = false</c> and <c>IsDeleted = true</c>
+    /// on the aggregate but does NOT remove files from the cloud provider (<c>IFileStorage</c>).
+    ///
+    /// Physical file cleanup should be handled by a background job (e.g., Hangfire) that periodically
+    /// queries for inactive records older than a configured retention period (recommended: 30 days)
+    /// and then calls the <c>DELETE</c> endpoint to perform the hard delete.
+    ///
+    /// Use this endpoint when a user removes an image from the UI but you want to retain a grace period
+    /// for recovery in case of accidental deletion.
+    /// </remarks>
+    /// <param name="id">The <see cref="Guid"/> of the <c>FileStorageAggregate</c> to deactivate.</param>
+    /// <param name="cancellationToken">Propagates cancellation from the HTTP pipeline.</param>
+    /// <returns><see cref="NoContentResult"/> (HTTP 204) on success.</returns>
+    /// <response code="204">Aggregate marked as inactive successfully.</response>
+    /// <response code="401">Missing or invalid bearer token.</response>
+    /// <response code="404">No aggregate exists for the supplied <paramref name="id"/>.</response>
+    [HttpPatch("{id}/deactivate")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Deactivate(Guid id, CancellationToken cancellationToken)
+    {
+        var command = new DeactivateFileStorageCommand(id);
+
+        await mediator.Send(command, cancellationToken);
+
+        return NoContent();
     }
 }
