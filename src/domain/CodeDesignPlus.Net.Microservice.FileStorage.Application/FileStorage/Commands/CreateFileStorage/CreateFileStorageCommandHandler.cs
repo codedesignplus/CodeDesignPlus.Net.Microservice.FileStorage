@@ -15,7 +15,7 @@ public class CreateFileStorageCommandHandler(IFileStorageRepository repository, 
 
         aggregate ??= FileStorageAggregate.Create(request.Id, request.File, request.Target, user.Tenant, user.IdUser);
 
-        var response = await fileStorage.UploadAsync(request.Stream, request.File, request.Target, request.Renowned, cancellationToken);
+        var response = await fileStorage.UploadAsync(request.Stream, request.File, request.Target, request.Renowned, user.Tenant, cancellationToken);
 
         foreach (var item in response)
         {

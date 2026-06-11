@@ -10,7 +10,7 @@ public class DownloadQueryHandler(IFileStorageRepository repository, IUserContex
 
         DomainGuard.IsFalse(exist, Errors.FileNotFound);
 
-        var file = await fileStorage.DownloadAsync(request.File, request.Target, cancellationToken);
+        var file = await fileStorage.DownloadAsync(request.File, request.Target, user.Tenant, cancellationToken);
 
         return file;
     }

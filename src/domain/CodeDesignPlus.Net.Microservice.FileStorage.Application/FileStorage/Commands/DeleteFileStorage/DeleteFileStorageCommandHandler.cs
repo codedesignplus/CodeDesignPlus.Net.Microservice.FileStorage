@@ -18,7 +18,7 @@ public class DeleteFileStorageCommandHandler(IFileStorageRepository repository, 
 
         await repository.UpdateAsync(aggregate, cancellationToken);
 
-        await fileStorage.DeleteAsync(aggregate.File, aggregate.Target, cancellationToken);
+        await fileStorage.DeleteAsync(aggregate.File, aggregate.Target, aggregate.Tenant, cancellationToken);
 
         await pubsub.PublishAsync(aggregate.GetAndClearEvents(), cancellationToken);
     }

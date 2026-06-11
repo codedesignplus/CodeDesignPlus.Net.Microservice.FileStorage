@@ -67,6 +67,7 @@ public class FileStorageCleanupJob(
                     await fileStorage.DeleteAsync(
                         file.FileDetail.FullName,
                         aggregate.Target,
+                        aggregate.Tenant,
                         cancellationToken.ShutdownToken);
                 }
 

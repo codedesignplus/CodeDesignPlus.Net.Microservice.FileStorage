@@ -3,7 +3,7 @@ using CodeDesignPlus.Net.File.Storage.Abstractions.Models;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Queries.GetSignedUrlById;
 
-public class GetSignedUrlByIdQueryHandler(IFileStorageRepository repository, IFileStorage fileStorage) : IRequestHandler<GetSignedUrlByIdQuery, FileDetail>
+public class GetSignedUrlByIdQueryHandler(IFileStorageRepository repository, IFileStorage fileStorage, IUserContext user) : IRequestHandler<GetSignedUrlByIdQuery, FileDetail>
 {
     public async Task<FileDetail> Handle(GetSignedUrlByIdQuery request, CancellationToken cancellationToken)
     {
@@ -13,7 +13,7 @@ public class GetSignedUrlByIdQueryHandler(IFileStorageRepository repository, IFi
 
         ApplicationGuard.IsFalse(exist, Errors.FileNotFound);
 
-        var response = await fileStorage.GetSignedUrlAsync(request.File, request.Target, TimeSpan.FromMinutes(5), cancellationToken);
+        var response = await fileStorage.GetSignedUrlAsync(request.File, request.Target, TimeSpan.FromMinutes(5), user.Tenant, cancellationToken);
 
         return response.File.Detail;
     }

@@ -39,6 +39,7 @@ public class GetFileStorageWithSignedUrlsQueryHandler(
                     metadata.File,
                     metadata.Target,
                     expiration,
+                    userContext.Tenant,
                     cancellationToken);
 
                 // Update metadata with signed URL information
