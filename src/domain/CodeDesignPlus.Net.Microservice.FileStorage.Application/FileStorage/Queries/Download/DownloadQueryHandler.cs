@@ -12,6 +12,14 @@ public class DownloadQueryHandler(IFileStorageRepository repository, IUserContex
 
         var file = await fileStorage.DownloadAsync(request.File, request.Target, user.Tenant, cancellationToken);
 
+        // Si el aggregate existe pero el `file`/`target` no resuelve a un blob real (p. ej. el caller
+        // pasó el name sin extensión), la SDK devuelve un Response sin File/Stream poblados.
+        // Convertimos esa señal en FileNotFound — el filtro global la mapea a 404 — en vez de dejar
+        // que el controller explote con NRE al leer `result.File.FullName`.
+        ApplicationGuard.IsNull(file, Errors.FileNotFound);
+        ApplicationGuard.IsNull(file.File, Errors.FileNotFound);
+        ApplicationGuard.IsNull(file.Stream, Errors.FileNotFound);
+
         return file;
     }
 }
