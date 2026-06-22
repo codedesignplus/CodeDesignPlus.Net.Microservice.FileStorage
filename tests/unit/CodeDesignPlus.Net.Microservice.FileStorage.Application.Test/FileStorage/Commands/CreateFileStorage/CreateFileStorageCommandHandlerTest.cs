@@ -81,7 +81,7 @@ public class CreateFileStorageCommandHandlerTest
         var fileValueObject = new Domain.ValueObjects.File(response.Success, response.Message, fileDeatilValueObject, response.Provider);
 
         fileStorageMock
-            .Setup(fs => fs.UploadAsync(request.Stream, request.File, request.Target, request.Renowned, cancellationToken))
+            .Setup(fs => fs.UploadAsync(request.Stream, request.File, request.Target, request.Renowned, It.IsAny<Guid>(), cancellationToken))
             .ReturnsAsync([response]);
 
         mapperMock
@@ -125,7 +125,7 @@ public class CreateFileStorageCommandHandlerTest
             .ReturnsAsync(existingAggregate);
 
         fileStorageMock
-            .Setup(fs => fs.UploadAsync(request.Stream, request.File, request.Target, request.Renowned, cancellationToken))
+            .Setup(fs => fs.UploadAsync(request.Stream, request.File, request.Target, request.Renowned, It.IsAny<Guid>(), cancellationToken))
             .ReturnsAsync([response]);
 
         mapperMock

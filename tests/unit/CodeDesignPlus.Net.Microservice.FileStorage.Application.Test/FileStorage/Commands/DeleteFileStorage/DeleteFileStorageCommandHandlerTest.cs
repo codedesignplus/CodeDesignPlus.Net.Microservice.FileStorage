@@ -90,7 +90,7 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStora
 
             // Assert
             repositoryMock.Verify(repo => repo.UpdateAsync(aggregate, cancellationToken), Times.Once);
-            fileStorageMock.Verify(fs => fs.DeleteAsync(aggregate.File, aggregate.Target, cancellationToken), Times.Once);
+            fileStorageMock.Verify(fs => fs.DeleteAsync(aggregate.File, aggregate.Target, It.IsAny<Guid>(), cancellationToken), Times.Once);
             pubSubMock.Verify(pubsub => pubsub.PublishAsync(aggregate.GetAndClearEvents(), cancellationToken), Times.AtMostOnce);
         }
     }
