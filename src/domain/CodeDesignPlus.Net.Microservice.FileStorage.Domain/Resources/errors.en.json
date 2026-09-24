@@ -1,0 +1,21 @@
+{
+  "language": "en",
+  "errors": {
+    "100": "UnknownError",
+    "101": "The file is invalid",
+    "102": "The target is invalid",
+    "103": "The uri is invalid",
+    "104": "The uri download is invalid",
+    "105": "The uri view in browser is invalid",
+    "106": "The extension is invalid",
+    "107": "The full name is invalid",
+    "108": "The detail is invalid",
+    "109": "The file size is invalid",
+    "110": "The version is invalid",
+    "111": "The file detail is invalid",
+    "112": "The provider is invalid",
+    "113": "The file already exists",
+    "114": "The file does not exists",
+    "115": "The update by is invalid"
+  }
+}

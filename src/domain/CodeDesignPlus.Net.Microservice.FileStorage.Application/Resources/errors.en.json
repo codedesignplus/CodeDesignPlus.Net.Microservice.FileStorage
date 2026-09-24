@@ -1,0 +1,9 @@
+{
+  "language": "en",
+  "errors": {
+    "200": "UnknownError",
+    "201": "The request is invalid.",
+    "202": "The file storage does not exist.",
+    "203": "The file does not exist."
+  }
+}
