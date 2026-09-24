@@ -1,0 +1,9 @@
+{
+  "language": "fr",
+  "errors": {
+    "200": "Erreur inconnue.",
+    "201": "La requête n'est pas valide.",
+    "202": "Le stockage de fichiers n'existe pas.",
+    "203": "Le fichier n'existe pas."
+  }
+}

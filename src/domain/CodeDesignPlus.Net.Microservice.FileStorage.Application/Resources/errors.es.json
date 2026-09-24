@@ -1,9 +1,9 @@
 {
   "language": "es",
   "errors": {
-    "200": "",
-    "201": "",
-    "202": "",
-    "203": ""
+    "200": "Error desconocido.",
+    "201": "La petición no es válida.",
+    "202": "El almacenamiento de archivos no existe.",
+    "203": "El archivo no existe."
   }
 }

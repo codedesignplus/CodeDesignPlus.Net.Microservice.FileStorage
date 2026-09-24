@@ -1,0 +1,21 @@
+{
+  "language": "fr",
+  "errors": {
+    "100": "Erreur inconnue.",
+    "101": "Le fichier n'est pas valide.",
+    "102": "La destination n'est pas valide.",
+    "103": "L'adresse n'est pas valide.",
+    "104": "L'adresse de téléchargement n'est pas valide.",
+    "105": "L'adresse d'affichage dans le navigateur n'est pas valide.",
+    "106": "L'extension du fichier n'est pas valide.",
+    "107": "Le nom complet n'est pas valide.",
+    "108": "Le détail n'est pas valide.",
+    "109": "La taille du fichier n'est pas valide.",
+    "110": "La version n'est pas valide.",
+    "111": "Le détail du fichier n'est pas valide.",
+    "112": "Le fournisseur n'est pas valide.",
+    "113": "Ce fichier existe déjà.",
+    "114": "Le fichier n'existe pas.",
+    "115": "L'identifiant de l'auteur de la modification n'est pas valide."
+  }
+}

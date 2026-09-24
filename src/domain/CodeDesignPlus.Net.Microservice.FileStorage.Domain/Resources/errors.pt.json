@@ -1,0 +1,21 @@
+{
+  "language": "pt",
+  "errors": {
+    "100": "Erro desconhecido.",
+    "101": "O arquivo não é válido.",
+    "102": "O destino não é válido.",
+    "103": "O endereço não é válido.",
+    "104": "O endereço de download não é válido.",
+    "105": "O endereço para visualizar no navegador não é válido.",
+    "106": "A extensão do arquivo não é válida.",
+    "107": "O nome completo não é válido.",
+    "108": "O detalhe não é válido.",
+    "109": "O tamanho do arquivo não é válido.",
+    "110": "A versão não é válida.",
+    "111": "O detalhe do arquivo não é válido.",
+    "112": "O provedor não é válido.",
+    "113": "Esse arquivo já existe.",
+    "114": "O arquivo não existe.",
+    "115": "O identificador de quem altera não é válido."
+  }
+}

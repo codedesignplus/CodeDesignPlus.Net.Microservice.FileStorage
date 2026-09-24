@@ -1,0 +1,9 @@
+{
+  "language": "pt",
+  "errors": {
+    "200": "Erro desconhecido.",
+    "201": "A requisição não é válida.",
+    "202": "O armazenamento de arquivos não existe.",
+    "203": "O arquivo não existe."
+  }
+}

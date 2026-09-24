@@ -1,21 +1,21 @@
 {
   "language": "es",
   "errors": {
-    "100": "",
-    "101": "",
-    "102": "",
-    "103": "",
-    "104": "",
-    "105": "",
-    "106": "",
-    "107": "",
-    "108": "",
-    "109": "",
-    "110": "",
-    "111": "",
-    "112": "",
-    "113": "",
-    "114": "",
-    "115": ""
+    "100": "Error desconocido.",
+    "101": "El archivo no es válido.",
+    "102": "El destino no es válido.",
+    "103": "La dirección no es válida.",
+    "104": "La dirección de descarga no es válida.",
+    "105": "La dirección para ver en el navegador no es válida.",
+    "106": "La extensión del archivo no es válida.",
+    "107": "El nombre completo no es válido.",
+    "108": "El detalle no es válido.",
+    "109": "El tamaño del archivo no es válido.",
+    "110": "La versión no es válida.",
+    "111": "El detalle del archivo no es válido.",
+    "112": "El proveedor no es válido.",
+    "113": "Ese archivo ya existe.",
+    "114": "El archivo no existe.",
+    "115": "El identificador de quien modifica no es válido."
   }
 }
