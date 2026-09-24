@@ -9,14 +9,10 @@ public class GetFileStorageWithSignedUrlsQueryValidator : AbstractValidator<GetF
     {
         RuleFor(x => x.Id)
             .NotEmpty()
-            .WithMessage("Id is required")
-            .NotEqual(Guid.Empty)
-            .WithMessage("Id must be a valid GUID");
+            .NotEqual(Guid.Empty);
 
         RuleFor(x => x.ExpirationMinutes)
             .GreaterThan(0)
-            .WithMessage("ExpirationMinutes must be greater than 0")
-            .LessThanOrEqualTo(60)
-            .WithMessage("ExpirationMinutes must not exceed 60 minutes");
+            .LessThanOrEqualTo(60);
     }
 }

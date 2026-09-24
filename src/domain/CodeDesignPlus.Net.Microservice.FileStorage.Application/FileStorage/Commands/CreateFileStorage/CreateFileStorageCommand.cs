@@ -10,13 +10,13 @@ public class Validator : AbstractValidator<CreateFileStorageCommand>
     {
         RuleFor(x => x.Id).NotEmpty().NotNull();
         RuleFor(x => x.Stream).NotEmpty().NotNull();
-        RuleFor(x => x.File).NotEmpty().NotNull().WithMessage("File name cannot be empty.");
-        RuleFor(x => x.Target).NotEmpty().NotNull().WithMessage("Target cannot be empty.");
-        RuleFor(x => x.Renowned).NotNull().WithMessage("Renowned cannot be null.");
+        RuleFor(x => x.File).NotEmpty().NotNull();
+        RuleFor(x => x.Target).NotEmpty().NotNull();
+        RuleFor(x => x.Renowned).NotNull();
 
          When(x => x.Stream != null, () =>
         {
-            RuleFor(x => x.Stream.Length).GreaterThan(0).WithMessage("Stream length must be greater than 0.");
+            RuleFor(x => x.Stream.Length).GreaterThan(0);
         });
     }
 }
