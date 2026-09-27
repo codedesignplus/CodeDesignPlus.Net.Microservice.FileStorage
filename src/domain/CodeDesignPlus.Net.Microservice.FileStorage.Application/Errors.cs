@@ -9,4 +9,6 @@ public class Errors : IErrorCodes
     public static readonly Error FileStorageDoesNotExists = new("202");
 
     public static readonly Error FileNotFound = new("203");
+
+    public static readonly Error TenantFilesNotDeleted = new("204");
 }

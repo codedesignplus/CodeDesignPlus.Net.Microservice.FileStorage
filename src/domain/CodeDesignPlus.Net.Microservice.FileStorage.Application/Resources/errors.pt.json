@@ -4,6 +4,7 @@
     "200": "Erro desconhecido.",
     "201": "A requisição não é válida.",
     "202": "O armazenamento de arquivos não existe.",
-    "203": "O arquivo não existe."
+    "203": "O arquivo não existe.",
+    "204": "Não foi possível apagar os arquivos do condomínio: {0}"
   }
 }

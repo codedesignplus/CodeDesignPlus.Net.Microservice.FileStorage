@@ -4,6 +4,7 @@
     "200": "Erreur inconnue.",
     "201": "La requête n'est pas valide.",
     "202": "Le stockage de fichiers n'existe pas.",
-    "203": "Le fichier n'existe pas."
+    "203": "Le fichier n'existe pas.",
+    "204": "Les fichiers de la copropriété n'ont pas pu être supprimés : {0}"
   }
 }
