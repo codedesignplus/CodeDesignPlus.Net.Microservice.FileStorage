@@ -62,7 +62,7 @@ public class CreateFileStorageCommandTest
         var stream = new MemoryStream([]);
         var command = new CreateFileStorageCommand(Guid.NewGuid(), stream, "file.txt", "target", true);
         var result = validator.TestValidate(command);
-        result.ShouldHaveValidationErrorFor(x => x.Stream.Length).WithErrorMessage("Stream length must be greater than 0.");
+        result.ShouldHaveValidationErrorFor(x => x.Stream.Length).WithErrorCode("GreaterThanValidator");
     }
 
     [Fact]
