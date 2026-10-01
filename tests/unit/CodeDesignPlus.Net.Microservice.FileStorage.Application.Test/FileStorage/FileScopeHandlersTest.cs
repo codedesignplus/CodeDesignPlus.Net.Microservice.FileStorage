@@ -62,17 +62,19 @@ public class FileScopeHandlersTest
         repository.Verify(x => x.CreateAsync(It.Is<FileStorageAggregate>(a => a.Tenant == tenant && a.Target == "common-areas"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    [Fact]
-    public async Task Create_PlatformTarget_UploadsToPlatformContainer()
+    [Theory]
+    [InlineData("users", "me.png")]
+    [InlineData("system-email-templates", "terms.pdf")]
+    public async Task Create_PlatformTarget_UploadsToPlatformContainer(string target, string name)
     {
         var id = Guid.NewGuid();
         var handler = new CreateFileStorageCommandHandler(repository.Object, user.Object, pubsub.Object, fileStorage.Object, mapper.Object);
         fileStorage.Setup(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([]);
 
-        await handler.Handle(new CreateFileStorageCommand(id, new MemoryStream([1, 2]), "me.png", "users", false), CancellationToken.None);
+        await handler.Handle(new CreateFileStorageCommand(id, new MemoryStream([1, 2]), name, target, false), CancellationToken.None);
 
-        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "me.png", $"users/{id}", false, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
+        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), name, $"{target}/{id}", false, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
         repository.Verify(x => x.CreateAsync(It.Is<FileStorageAggregate>(a => a.Tenant == Guid.Empty), It.IsAny<CancellationToken>()), Times.Once);
     }
 

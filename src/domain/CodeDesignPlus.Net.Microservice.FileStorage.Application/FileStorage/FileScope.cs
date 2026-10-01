@@ -18,11 +18,13 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
 public static class FileScope
 {
     /// <summary>
-    /// Targets cuyos archivos son de la plataforma, no de una copropiedad.
+    /// Targets cuyos archivos son de la plataforma, no de una copropiedad: la foto de un usuario y los adjuntos de las
+    /// plantillas de correo del sistema (las de cada copropiedad usan «email-templates»).
     /// </summary>
     public static readonly IReadOnlySet<string> PlatformTargets = new HashSet<string>(StringComparer.Ordinal)
     {
         "users",
+        "system-email-templates",
     };
 
     /// <summary>
@@ -34,6 +36,7 @@ public static class FileScope
         "common-areas",
         "expense-invoices",
         "email-templates",
+        "system-email-templates",
         "quotation-documents",
         "pqrs-attachments",
         "infraction-evidence",
