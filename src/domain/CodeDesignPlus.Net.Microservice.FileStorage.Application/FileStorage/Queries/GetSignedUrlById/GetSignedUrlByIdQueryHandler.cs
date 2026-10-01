@@ -9,11 +9,18 @@ public class GetSignedUrlByIdQueryHandler(IFileStorageRepository repository, IFi
     {
         ApplicationGuard.IsNull(request, Errors.InvalidRequest);
 
-        var exist = await repository.ExistsAsync<FileStorageAggregate>(request.Id, cancellationToken);
+        var aggregate = await repository.FindVisibleAsync(request.Id, user.Tenant, cancellationToken);
 
-        ApplicationGuard.IsFalse(exist, Errors.FileNotFound);
+        ApplicationGuard.IsNull(aggregate, Errors.FileNotFound);
+        ApplicationGuard.IsFalse(aggregate!.IsActive, Errors.FileNotFound);
 
-        var response = await fileStorage.GetSignedUrlAsync(request.File, request.Target, TimeSpan.FromMinutes(5), user.Tenant, cancellationToken);
+        var stored = aggregate.Files.FirstOrDefault(x => x.Success);
+
+        ApplicationGuard.IsNull(stored, Errors.FileNotFound);
+
+        var (name, folder) = FileScope.BlobOf(stored!, aggregate.Target);
+
+        var response = await fileStorage.GetSignedUrlAsync(name, folder, TimeSpan.FromMinutes(5), aggregate.Tenant, cancellationToken);
 
         return response.File.Detail;
     }

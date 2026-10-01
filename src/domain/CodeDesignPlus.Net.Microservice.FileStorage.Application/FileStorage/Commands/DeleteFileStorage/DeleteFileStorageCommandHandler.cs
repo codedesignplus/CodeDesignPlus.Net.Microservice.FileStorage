@@ -8,17 +8,22 @@ public class DeleteFileStorageCommandHandler(IFileStorageRepository repository, 
     {
         ApplicationGuard.IsNull(request, Errors.InvalidRequest);
         
-        var exist = await repository.ExistsAsync<FileStorageAggregate>(request.Id, cancellationToken);
+        var aggregate = await repository.FindVisibleAsync(request.Id, user.Tenant, cancellationToken);
 
-        ApplicationGuard.IsFalse(exist, Errors.FileStorageDoesNotExists);
-
-        var aggregate = await repository.FindAsync<FileStorageAggregate>(request.Id, cancellationToken);
+        ApplicationGuard.IsNull(aggregate, Errors.FileStorageDoesNotExists);
+        ApplicationGuard.IsTrue(aggregate!.Tenant == Guid.Empty && aggregate.CreatedBy != user.IdUser, Errors.FileStorageDoesNotExists);
 
         aggregate.Delete(user.IdUser);
 
         await repository.UpdateAsync(aggregate, cancellationToken);
 
-        await fileStorage.DeleteAsync(aggregate.File, aggregate.Target, aggregate.Tenant, cancellationToken);
+        // Se borra el blob real de cada archivo, no el nombre original: ese puede ser el de otro registro (pendings/167).
+        foreach (var file in aggregate.Files)
+        {
+            var (name, folder) = FileScope.BlobOf(file, aggregate.Target);
+
+            await fileStorage.DeleteAsync(name, folder, aggregate.Tenant, cancellationToken);
+        }
 
         await pubsub.PublishAsync(aggregate.GetAndClearEvents(), cancellationToken);
     }

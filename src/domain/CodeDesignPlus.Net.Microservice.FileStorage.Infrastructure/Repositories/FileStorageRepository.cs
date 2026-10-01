@@ -23,4 +23,14 @@ public class FileStorageRepository(IServiceProvider serviceProvider, IOptions<Mo
             .Limit(batchSize)
             .ToListAsync(cancellationToken);
     }
+
+    /// <inheritdoc />
+    public async Task<FileStorageAggregate?> FindVisibleAsync(Guid id, Guid sessionTenant, CancellationToken cancellationToken)
+    {
+        var filter = Builders<FileStorageAggregate>.Filter.And(
+            Builders<FileStorageAggregate>.Filter.Eq(x => x.Id, id),
+            Builders<FileStorageAggregate>.Filter.In(x => x.Tenant, new[] { sessionTenant, Guid.Empty }));
+
+        return await GetCollection<FileStorageAggregate>().Find(filter).FirstOrDefaultAsync(cancellationToken);
+    }
 }

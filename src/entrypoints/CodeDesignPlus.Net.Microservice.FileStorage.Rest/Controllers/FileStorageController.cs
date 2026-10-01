@@ -123,9 +123,10 @@ public class FileStorageController(IMediator mediator) : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Download(Guid id, [FromQuery] string file, [FromQuery] string target, [FromQuery] bool viewInBrowser, CancellationToken cancellationToken)
+    public async Task<IActionResult> Download(Guid id, [FromQuery] bool viewInBrowser, CancellationToken cancellationToken)
     {
-        var query = new DownloadQuery(id, file, target);
+        // El archivo sale del registro: los parámetros file y target que todavía manda el frontend se ignoran (pendings/168).
+        var query = new DownloadQuery(id);
 
         var result = await mediator.Send(query, cancellationToken);
 

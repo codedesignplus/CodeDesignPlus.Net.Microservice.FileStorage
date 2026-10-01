@@ -6,18 +6,19 @@ public class GetFileStorageByIdQueryHandler(IFileStorageRepository repository, I
     {
         ApplicationGuard.IsNull(request, Errors.InvalidRequest);
 
-        var exists = await cacheManager.ExistsAsync(request.Id.ToString());
+        // La clave lleva la copropiedad: con solo el id, lo que una copropiedad dejaba en caché lo leía otra (pendings/168).
+        var key = $"{user.Tenant}:{request.Id}";
 
-        if (exists)
-            return await cacheManager.GetAsync<FileStorageDto>(request.Id.ToString());
+        if (await cacheManager.ExistsAsync(key))
+            return await cacheManager.GetAsync<FileStorageDto>(key);
 
-        var aggregate = await repository.FindAsync<FileStorageAggregate>(request.Id, user.Tenant, cancellationToken);
+        var aggregate = await repository.FindVisibleAsync(request.Id, user.Tenant, cancellationToken);
 
         ApplicationGuard.IsNull(aggregate, Errors.FileStorageDoesNotExists);
 
         var dto = mapper.Map<FileStorageDto>(aggregate);
 
-        await cacheManager.SetAsync(request.Id.ToString(), dto);
+        await cacheManager.SetAsync(key, dto);
 
         return dto;
     }

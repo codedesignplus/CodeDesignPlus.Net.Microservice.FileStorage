@@ -59,7 +59,7 @@ public class CreateFileStorageCommandHandlerTest
     public async Task Handle_AggregateDoesNotExist_CreatesNewAggregate()
     {
         // Arrange
-        var request = new CreateFileStorageCommand(Guid.NewGuid(), new MemoryStream(), "fake.txt", "custom", false);
+        var request = new CreateFileStorageCommand(Guid.NewGuid(), new MemoryStream(), "fake.txt", "common-areas", false);
 
         var cancellationToken = CancellationToken.None;
 
@@ -81,7 +81,7 @@ public class CreateFileStorageCommandHandlerTest
         var fileValueObject = new Domain.ValueObjects.File(response.Success, response.Message, fileDeatilValueObject, response.Provider);
 
         fileStorageMock
-            .Setup(fs => fs.UploadAsync(request.Stream, request.File, request.Target, request.Renowned, It.IsAny<Guid>(), cancellationToken))
+            .Setup(fs => fs.UploadAsync(request.Stream, request.File, It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), cancellationToken))
             .ReturnsAsync([response]);
 
         mapperMock
@@ -101,7 +101,7 @@ public class CreateFileStorageCommandHandlerTest
     public async Task Handle_AggregateExists_UpdatesAggregate()
     {
         // Arrange
-        var request = new CreateFileStorageCommand(Guid.NewGuid(), new MemoryStream(), "fake.txt", "custom", false);
+        var request = new CreateFileStorageCommand(Guid.NewGuid(), new MemoryStream(), "fake.txt", "common-areas", false);
 
         var cancellationToken = CancellationToken.None;
 
@@ -125,7 +125,7 @@ public class CreateFileStorageCommandHandlerTest
             .ReturnsAsync(existingAggregate);
 
         fileStorageMock
-            .Setup(fs => fs.UploadAsync(request.Stream, request.File, request.Target, request.Renowned, It.IsAny<Guid>(), cancellationToken))
+            .Setup(fs => fs.UploadAsync(request.Stream, request.File, It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), cancellationToken))
             .ReturnsAsync([response]);
 
         mapperMock

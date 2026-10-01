@@ -1,6 +1,7 @@
 using CodeDesignPlus.Net.File.Storage.Abstractions;
 using CodeDesignPlus.Net.Hangfire.Abstractions;
 using CodeDesignPlus.Net.Hangfire.Abstractions.Attributes;
+using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
 using CodeDesignPlus.Net.Microservice.FileStorage.Domain;
 using CodeDesignPlus.Net.Microservice.FileStorage.Domain.Repositories;
 using Hangfire;
@@ -62,11 +63,15 @@ public class FileStorageCleanupJob(
                     aggregate.Target,
                     aggregate.UpdatedAt);
 
+                // El blob real de cada archivo, tal como se guardó: {target}/{id}/{nombre}. Borrar por el nombre original y
+                // el target del registro se llevaba el archivo de otro registro con el mismo nombre (pendings/167).
                 foreach (var file in aggregate.Files)
                 {
+                    var (name, folder) = FileScope.BlobOf(file, aggregate.Target);
+
                     await fileStorage.DeleteAsync(
-                        file.FileDetail.FullName,
-                        aggregate.Target,
+                        name,
+                        folder,
                         aggregate.Tenant,
                         cancellationToken.ShutdownToken);
                 }

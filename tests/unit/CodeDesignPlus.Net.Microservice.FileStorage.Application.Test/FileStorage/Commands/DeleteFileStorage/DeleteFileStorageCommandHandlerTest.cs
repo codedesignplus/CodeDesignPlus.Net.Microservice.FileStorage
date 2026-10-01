@@ -53,8 +53,8 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStora
             var cancellationToken = CancellationToken.None;
 
             repositoryMock
-                .Setup(repo => repo.ExistsAsync<FileStorageAggregate>(request.Id, cancellationToken))
-                .ReturnsAsync(false);
+                .Setup(repo => repo.FindVisibleAsync(request.Id, It.IsAny<Guid>(), cancellationToken))
+                .ReturnsAsync((FileStorageAggregate?)null);
 
             // Act & Assert
             var exception = await Assert.ThrowsAsync<CodeDesignPlusException>(() => handler.Handle(request, cancellationToken));
@@ -74,11 +74,7 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStora
             var aggregate = FileStorageAggregate.Create(request.Id, "fake.txt", "custom", Guid.NewGuid(), Guid.NewGuid());
 
             repositoryMock
-                .Setup(repo => repo.ExistsAsync<FileStorageAggregate>(request.Id, cancellationToken))
-                .ReturnsAsync(true);
-
-            repositoryMock
-                .Setup(repo => repo.FindAsync<FileStorageAggregate>(request.Id, cancellationToken))
+                .Setup(repo => repo.FindVisibleAsync(request.Id, It.IsAny<Guid>(), cancellationToken))
                 .ReturnsAsync(aggregate);
 
             userContextMock
@@ -90,7 +86,8 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStora
 
             // Assert
             repositoryMock.Verify(repo => repo.UpdateAsync(aggregate, cancellationToken), Times.Once);
-            fileStorageMock.Verify(fs => fs.DeleteAsync(aggregate.File, aggregate.Target, It.IsAny<Guid>(), cancellationToken), Times.Once);
+            // Sin archivos subidos no hay blob que borrar; el blob real se prueba en FileScopeHandlersTest.
+            fileStorageMock.Verify(fs => fs.DeleteAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Guid>(), cancellationToken), Times.Never);
             pubSubMock.Verify(pubsub => pubsub.PublishAsync(aggregate.GetAndClearEvents(), cancellationToken), Times.AtMostOnce);
         }
     }

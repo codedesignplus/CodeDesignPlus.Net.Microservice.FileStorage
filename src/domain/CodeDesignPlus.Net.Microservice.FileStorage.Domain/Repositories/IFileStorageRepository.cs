@@ -15,4 +15,10 @@ public interface IFileStorageRepository : IRepositoryBase
         int retentionDays,
         int batchSize,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Busca un archivo que la sesión puede ver: el de su copropiedad o uno de plataforma (contenedor
+    /// <see cref="Guid.Empty"/>). Nunca el de otra copropiedad (pendings/168).
+    /// </summary>
+    Task<FileStorageAggregate?> FindVisibleAsync(Guid id, Guid sessionTenant, CancellationToken cancellationToken);
 }

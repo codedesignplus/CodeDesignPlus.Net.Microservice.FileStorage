@@ -11,4 +11,9 @@ public class Errors : IErrorCodes
     public static readonly Error FileNotFound = new("203");
 
     public static readonly Error TenantFilesNotDeleted = new("204");
+
+    /// <summary>
+    /// El target de la subida no está en la lista de targets permitidos.
+    /// </summary>
+    public static readonly Error TargetIsNotAllowed = new("205");
 }

@@ -13,11 +13,11 @@ public class DeactivateFileStorageCommandHandler(
     {
         ApplicationGuard.IsNull(request, Errors.InvalidRequest);
 
-        var exist = await repository.ExistsAsync<FileStorageAggregate>(request.Id, cancellationToken);
+        // Solo un archivo de la copropiedad en sesión, o uno de plataforma que subió quien lo desactiva (pendings/168).
+        var aggregate = await repository.FindVisibleAsync(request.Id, user.Tenant, cancellationToken);
 
-        ApplicationGuard.IsFalse(exist, Errors.FileStorageDoesNotExists);
-
-        var aggregate = await repository.FindAsync<FileStorageAggregate>(request.Id, cancellationToken);
+        ApplicationGuard.IsNull(aggregate, Errors.FileStorageDoesNotExists);
+        ApplicationGuard.IsTrue(aggregate!.Tenant == Guid.Empty && aggregate.CreatedBy != user.IdUser, Errors.FileStorageDoesNotExists);
 
         aggregate.Delete(user.IdUser);
 

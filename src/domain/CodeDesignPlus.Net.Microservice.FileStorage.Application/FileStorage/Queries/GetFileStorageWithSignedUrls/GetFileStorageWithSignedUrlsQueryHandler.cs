@@ -18,9 +18,11 @@ public class GetFileStorageWithSignedUrlsQueryHandler(
         ApplicationGuard.GuidIsEmpty(request.Id, Errors.FileNotFound);
 
         // Get the aggregate
-        var aggregate = await repository.FindAsync<FileStorageAggregate>(request.Id, userContext.Tenant, cancellationToken);
+        // De la copropiedad en sesión o de plataforma, y activo: uno desactivado ya no se sirve (pendings/168).
+        var aggregate = await repository.FindVisibleAsync(request.Id, userContext.Tenant, cancellationToken);
 
         ApplicationGuard.IsNull(aggregate, Errors.FileNotFound);
+        ApplicationGuard.IsFalse(aggregate!.IsActive, Errors.FileNotFound);
 
         // Map to DTO first
         var dto = mapper.Map<FileStorageDto>(aggregate);
@@ -39,7 +41,7 @@ public class GetFileStorageWithSignedUrlsQueryHandler(
                     metadata.File,
                     metadata.Target,
                     expiration,
-                    userContext.Tenant,
+                    aggregate.Tenant,
                     cancellationToken);
 
                 // Update metadata with signed URL information
