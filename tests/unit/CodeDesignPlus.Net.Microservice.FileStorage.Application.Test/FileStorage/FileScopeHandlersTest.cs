@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using CodeDesignPlus.Net.File.Storage.Abstractions;
 using CodeDesignPlus.Net.File.Storage.Abstractions.Providers;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
-using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.CreateFileStorage;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.DeactivateFileStorage;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.DeleteFileStorage;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Queries.Download;
@@ -19,13 +18,15 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStora
 /// Where each file lives and who can reach it (pendings/167 and 168): one folder per id, platform files outside any
 /// condominium, and every read or write of an existing file goes through the stored blob of a visible record.
 /// </summary>
+/// <remarks>
+/// Las pruebas de la subida viven en <c>StoreFileCommandHandlerTest</c>: el handler REST ya no guarda, delega (pendings/260).
+/// </remarks>
 public class FileScopeHandlersTest
 {
     private readonly Mock<IFileStorageRepository> repository = new();
     private readonly Mock<IUserContext> user = new();
     private readonly Mock<IPubSub> pubsub = new();
     private readonly Mock<IFileStorage> fileStorage = new();
-    private readonly Mock<IMapper> mapper = new();
 
     private readonly Guid tenant = Guid.NewGuid();
     private readonly Guid userId = Guid.NewGuid();
@@ -34,48 +35,6 @@ public class FileScopeHandlersTest
     {
         user.SetupGet(x => x.Tenant).Returns(tenant);
         user.SetupGet(x => x.IdUser).Returns(userId);
-    }
-
-    [Fact]
-    public async Task Create_TargetNotAllowed_ThrowsTargetIsNotAllowed()
-    {
-        var handler = new CreateFileStorageCommandHandler(repository.Object, user.Object, pubsub.Object, fileStorage.Object, mapper.Object);
-
-        var exception = await Assert.ThrowsAsync<CodeDesignPlusException>(() =>
-            handler.Handle(new CreateFileStorageCommand(Guid.NewGuid(), new MemoryStream([1, 2]), "photo.jpg", "../other", false), CancellationToken.None));
-
-        Assert.Equal(Errors.TargetIsNotAllowed.GetCode(), exception.Code);
-        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
-    }
-
-    [Fact]
-    public async Task Create_CondominiumTarget_UploadsToSessionTenantUnderIdFolder()
-    {
-        var id = Guid.NewGuid();
-        var handler = new CreateFileStorageCommandHandler(repository.Object, user.Object, pubsub.Object, fileStorage.Object, mapper.Object);
-        fileStorage.Setup(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
-
-        await handler.Handle(new CreateFileStorageCommand(id, new MemoryStream([1, 2]), "photo.jpg", "common-areas", true), CancellationToken.None);
-
-        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "photo.jpg", $"common-areas/{id}", false, tenant, It.IsAny<CancellationToken>()), Times.Once);
-        repository.Verify(x => x.CreateAsync(It.Is<FileStorageAggregate>(a => a.Tenant == tenant && a.Target == "common-areas"), It.IsAny<CancellationToken>()), Times.Once);
-    }
-
-    [Theory]
-    [InlineData("users", "me.png")]
-    [InlineData("system-email-templates", "terms.pdf")]
-    public async Task Create_PlatformTarget_UploadsToPlatformContainer(string target, string name)
-    {
-        var id = Guid.NewGuid();
-        var handler = new CreateFileStorageCommandHandler(repository.Object, user.Object, pubsub.Object, fileStorage.Object, mapper.Object);
-        fileStorage.Setup(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([]);
-
-        await handler.Handle(new CreateFileStorageCommand(id, new MemoryStream([1, 2]), name, target, false), CancellationToken.None);
-
-        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), name, $"{target}/{id}", false, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
-        repository.Verify(x => x.CreateAsync(It.Is<FileStorageAggregate>(a => a.Tenant == Guid.Empty), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]

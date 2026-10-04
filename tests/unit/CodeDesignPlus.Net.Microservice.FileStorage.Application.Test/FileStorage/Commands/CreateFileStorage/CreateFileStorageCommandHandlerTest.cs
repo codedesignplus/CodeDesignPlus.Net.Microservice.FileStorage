@@ -1,143 +1,62 @@
-using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Core;
-using CodeDesignPlus.Net.File.Storage.Abstractions;
-using CodeDesignPlus.Net.File.Storage.Abstractions.Providers;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.CreateFileStorage;
-using CodeDesignPlus.Net.Microservice.FileStorage.Domain.DomainEvents;
-using CodeDesignPlus.Net.Microservice.FileStorage.Domain.ValueObjects;
-using Moq;
+using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.StoreFile;
+using MediatR;
 using Xunit;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStorage.Commands.CreateFileStorage;
 
+/// <summary>
+/// La subida por REST no guarda por sí misma: delega en <see cref="StoreFileCommand"/> con la copropiedad y el usuario
+/// de la sesión, para que REST y gRPC pasen por el mismo sitio (pendings/260).
+/// </summary>
 public class CreateFileStorageCommandHandlerTest
 {
-    private readonly Mock<IFileStorageRepository> repositoryMock;
-    private readonly Mock<IUserContext> userContextMock;
-    private readonly Mock<IPubSub> pubSubMock;
-    private readonly Mock<IFileStorage> fileStorageMock;
-    private readonly Mock<IMapper> mapperMock;
+    private readonly Mock<IMediator> mediator = new();
+    private readonly Mock<IUserContext> user = new();
     private readonly CreateFileStorageCommandHandler handler;
 
     public CreateFileStorageCommandHandlerTest()
     {
-        repositoryMock = new Mock<IFileStorageRepository>();
-        userContextMock = new Mock<IUserContext>();
-        pubSubMock = new Mock<IPubSub>();
-        fileStorageMock = new Mock<IFileStorage>();
-        mapperMock = new Mock<IMapper>();
-
-        handler = new CreateFileStorageCommandHandler(
-            repositoryMock.Object,
-            userContextMock.Object,
-            pubSubMock.Object,
-            fileStorageMock.Object,
-            mapperMock.Object
-        );
+        handler = new CreateFileStorageCommandHandler(mediator.Object, user.Object);
     }
 
     [Fact]
-    public async Task Handle_RequestIsNull_ThrowsArgumentNullException()
+    public async Task Handle_RequestIsNull_ThrowsInvalidRequest()
     {
-        // Arrange
-        CreateFileStorageCommand request = null!;
-        var cancellationToken = CancellationToken.None;
-
-        // Act & Assert
-        var exception = await Assert.ThrowsAsync<CodeDesignPlusException>(() => handler.Handle(request, cancellationToken));
+        var exception = await Assert.ThrowsAsync<CodeDesignPlusException>(() => handler.Handle(null!, CancellationToken.None));
 
         Assert.Equal(Errors.InvalidRequest.GetMessage(), exception.Message);
         Assert.Equal(Errors.InvalidRequest.GetCode(), exception.Code);
         Assert.Equal(Layer.Application, exception.Layer);
+        mediator.Verify(x => x.Send(It.IsAny<StoreFileCommand>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
+    /// <summary>El archivo se guarda a nombre de la copropiedad y del usuario de la sesión, con el mismo contenido.</summary>
     [Fact]
-    public async Task Handle_AggregateDoesNotExist_CreatesNewAggregate()
+    public async Task Handle_ValidRequest_SendsStoreFileWithSessionTenantAndUser()
     {
-        // Arrange
-        var request = new CreateFileStorageCommand(Guid.NewGuid(), new MemoryStream(), "fake.txt", "common-areas", false);
+        var tenant = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        user.SetupGet(x => x.Tenant).Returns(tenant);
+        user.SetupGet(x => x.IdUser).Returns(userId);
+        var stream = new MemoryStream([1, 2]);
+        var request = new CreateFileStorageCommand(Guid.NewGuid(), stream, "photo.jpg", "common-areas", true);
+        mediator.Setup(x => x.Send(It.IsAny<StoreFileCommand>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new StoredFileDto { Id = request.Id, Target = request.Target, FileName = request.File });
 
-        var cancellationToken = CancellationToken.None;
+        await handler.Handle(request, CancellationToken.None);
 
-        repositoryMock
-            .Setup(repo => repo.FindAsync<FileStorageAggregate>(request.Id, cancellationToken))
-            .ReturnsAsync((FileStorageAggregate)null!);
-
-        userContextMock.SetupGet(user => user.Tenant).Returns(Guid.NewGuid());
-        userContextMock.SetupGet(user => user.IdUser).Returns(Guid.NewGuid());
-
-        var fileDetail = new File.Storage.Abstractions.Models.FileDetail(new Uri("http://example.com"), "custom", "fake.txt", TypeProviders.LocalProvider);
-        var file = new File.Storage.Abstractions.Models.File("fake.txt") {
-            Detail = fileDetail
-        };
-        var response = new File.Storage.Abstractions.Models.Response(file, TypeProviders.LocalProvider);
-
-        var metadata = Metadata.Create(file.Detail.File, file.Detail.Target, file.Detail.Uri, file.Detail.UriDownload, file.Detail.UriViewInBrowser, response.Provider);
-        var fileDeatilValueObject = FileDetail.Create(file.Extension, file.FullName, file.Name, metadata, 2, file.Version.ToString(), file.Renowned, file.Mime);
-        var fileValueObject = new Domain.ValueObjects.File(response.Success, response.Message, fileDeatilValueObject, response.Provider);
-
-        fileStorageMock
-            .Setup(fs => fs.UploadAsync(request.Stream, request.File, It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), cancellationToken))
-            .ReturnsAsync([response]);
-
-        mapperMock
-            .Setup(mapper => mapper.Map<Domain.ValueObjects.File>(It.IsAny<File.Storage.Abstractions.Models.Response>()))
-            .Returns(fileValueObject);
-
-        // Act
-        await handler.Handle(request, cancellationToken);
-
-        // Assert
-        repositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<FileStorageAggregate>(), cancellationToken), Times.Once);
-        pubSubMock.Verify(pubsub => pubsub.PublishAsync(It.IsAny<List<FileStorageAddedDomainEvent>>(), cancellationToken), Times.AtMostOnce);
-        pubSubMock.Verify(pubsub => pubsub.PublishAsync(It.IsAny<List<FileStorageCreatedDomainEvent>>(), cancellationToken), Times.AtMostOnce);
-    }
-
-    [Fact]
-    public async Task Handle_AggregateExists_UpdatesAggregate()
-    {
-        // Arrange
-        var request = new CreateFileStorageCommand(Guid.NewGuid(), new MemoryStream(), "fake.txt", "common-areas", false);
-
-        var cancellationToken = CancellationToken.None;
-
-        var existingAggregate = FileStorageAggregate.Create(request.Id, request.File, request.Target,  Guid.NewGuid(), Guid.NewGuid());
-        
-        userContextMock.SetupGet(user => user.Tenant).Returns(Guid.NewGuid());
-        userContextMock.SetupGet(user => user.IdUser).Returns(Guid.NewGuid());
-
-        var fileDetail = new File.Storage.Abstractions.Models.FileDetail(new Uri("http://example.com"), "custom", "fake.txt", TypeProviders.LocalProvider);
-        var file = new File.Storage.Abstractions.Models.File("fake.txt") {
-            Detail = fileDetail
-        };
-        var response = new File.Storage.Abstractions.Models.Response(file, TypeProviders.LocalProvider);
-
-        var metadata = Metadata.Create(file.Detail.File, file.Detail.Target, file.Detail.Uri, file.Detail.UriDownload, file.Detail.UriViewInBrowser, response.Provider);
-        var fileDeatilValueObject = FileDetail.Create(file.Extension, file.FullName, file.Name, metadata, 2, file.Version.ToString(), file.Renowned, file.Mime);
-        var fileValueObject = new Domain.ValueObjects.File(response.Success, response.Message, fileDeatilValueObject, response.Provider);
-
-        repositoryMock
-            .Setup(repo => repo.FindAsync<FileStorageAggregate>(request.Id, cancellationToken))
-            .ReturnsAsync(existingAggregate);
-
-        fileStorageMock
-            .Setup(fs => fs.UploadAsync(request.Stream, request.File, It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), cancellationToken))
-            .ReturnsAsync([response]);
-
-        mapperMock
-            .Setup(mapper => mapper.Map<Domain.ValueObjects.File>(It.IsAny<File.Storage.Abstractions.Models.Response>()))
-            .Returns(fileValueObject);
-
-        // Act
-        await handler.Handle(request, cancellationToken);
-
-        // Assert
-        repositoryMock.Verify(repo => repo.CreateAsync(It.IsAny<FileStorageAggregate>(), cancellationToken), Times.Once);
-        pubSubMock.Verify(pubsub => pubsub.PublishAsync(It.IsAny<List<FileStorageAddedDomainEvent>>(), cancellationToken), Times.AtMostOnce);
-        pubSubMock.Verify(pubsub => pubsub.PublishAsync(It.IsAny<List<FileStorageCreatedDomainEvent>>(), cancellationToken), Times.AtMostOnce);
+        mediator.Verify(x => x.Send(
+            It.Is<StoreFileCommand>(c =>
+                c.Id == request.Id &&
+                c.Stream == stream &&
+                c.File == "photo.jpg" &&
+                c.Target == "common-areas" &&
+                c.Tenant == tenant &&
+                c.UploadedBy == userId),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 }

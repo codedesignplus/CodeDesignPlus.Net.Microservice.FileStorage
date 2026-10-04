@@ -45,6 +45,10 @@ public static class FileScope
         "fee-exclusions",
         "ownership-proofs",
         "moving-inspections",
+        // Los documentos que el job de OCR de ms-vehicles guarda al registrar un vehículo (pendings/260). Llegan por gRPC.
+        "vehicle-documents",
+        // El PDF de la licencia que ms-licenses genera al aprobarse una compra (pendings/260). Llega por gRPC.
+        "licenses-pdf",
     };
 
     /// <summary>
