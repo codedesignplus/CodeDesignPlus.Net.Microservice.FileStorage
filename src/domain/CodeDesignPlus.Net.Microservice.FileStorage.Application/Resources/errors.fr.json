@@ -6,6 +6,6 @@
     "202": "Le stockage de fichiers n'existe pas.",
     "203": "Le fichier n'existe pas.",
     "204": "Les fichiers de la copropriété n'ont pas pu être supprimés : {0}",
-    "205": "Impossible d'envoyer des fichiers vers cette destination."
+    "205": "Ce dossier n'est pas valide : utilisez des minuscules, des chiffres et des tirets, 64 caractères au maximum."
   }
 }

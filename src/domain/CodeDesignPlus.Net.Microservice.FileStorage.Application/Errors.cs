@@ -15,5 +15,5 @@ public class Errors : IErrorCodes
     /// <summary>
     /// El target de la subida no está en la lista de targets permitidos.
     /// </summary>
-    public static readonly Error TargetIsNotAllowed = new("205");
+    public static readonly Error InvalidTarget = new("205");
 }

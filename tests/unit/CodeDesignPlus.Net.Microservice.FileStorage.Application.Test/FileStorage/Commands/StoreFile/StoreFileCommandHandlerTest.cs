@@ -5,6 +5,8 @@ using CodeDesignPlus.Net.File.Storage.Abstractions;
 using CodeDesignPlus.Net.File.Storage.Abstractions.Providers;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.StoreFile;
 using CodeDesignPlus.Net.Microservice.FileStorage.Domain.ValueObjects;
+using Microsoft.Extensions.Options;
+using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
 using Xunit;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStorage.Commands.StoreFile;
@@ -24,19 +26,70 @@ public class StoreFileCommandHandlerTest
     private readonly Guid tenant = Guid.NewGuid();
     private readonly Guid uploadedBy = Guid.NewGuid();
 
-    private StoreFileCommandHandler Handler() => new(repository.Object, pubsub.Object, fileStorage.Object, mapper.Object);
+    private readonly FileScopeOptions scope = new() { PlatformTargets = ["users", "system-email-templates"] };
 
-    /// <summary>Un target fuera de la lista no llega al blob ni crea registro.</summary>
-    [Fact]
-    public async Task Handle_TargetNotAllowed_ThrowsTargetIsNotAllowed()
+    private StoreFileCommandHandler Handler() => new(repository.Object, pubsub.Object, fileStorage.Object, mapper.Object, Options.Create(scope));
+
+    /// <summary>
+    /// A folder whose name could leave its place, or is not a plain name, never reaches the blob nor creates a record
+    /// (pendings/302).
+    /// </summary>
+    [Theory]
+    [InlineData("../other")]
+    [InlineData("..")]
+    [InlineData("a/b")]
+    [InlineData(@"a\b")]
+    [InlineData("Cash-Deposits")]
+    [InlineData("-leading-hyphen")]
+    [InlineData("with space")]
+    [InlineData("")]
+    [InlineData("a1234567890123456789012345678901234567890123456789012345678901234")]
+    public async Task Handle_UnsafeTarget_ThrowsInvalidTarget(string target)
     {
-        var command = new StoreFileCommand(Guid.NewGuid(), new MemoryStream([1, 2]), "photo.jpg", "../other", tenant, uploadedBy);
+        var command = new StoreFileCommand(Guid.NewGuid(), new MemoryStream([1, 2]), "photo.jpg", target, tenant, uploadedBy);
 
         var exception = await Assert.ThrowsAsync<CodeDesignPlusException>(() => Handler().Handle(command, CancellationToken.None));
 
-        Assert.Equal(Errors.TargetIsNotAllowed.GetCode(), exception.Code);
+        Assert.Equal(Errors.InvalidTarget.GetCode(), exception.Code);
         fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
         repository.Verify(x => x.CreateAsync(It.IsAny<FileStorageAggregate>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Any safe name is accepted without the service knowing it beforehand, and a folder that is not a platform one is
+    /// stored in the condominium in session (pendings/302).
+    /// </summary>
+    [Theory]
+    [InlineData("cash-deposits")]
+    [InlineData("a")]
+    [InlineData("folder-2026")]
+    [InlineData("a123456789012345678901234567890123456789012345678901234567890123")]
+    public async Task Handle_SafeTarget_StoresInSessionTenant(string target)
+    {
+        var id = Guid.NewGuid();
+        fileStorage.Setup(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        await Handler().Handle(new StoreFileCommand(id, new MemoryStream([1, 2]), "support.png", target, tenant, uploadedBy), CancellationToken.None);
+
+        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "support.png", $"{target}/{id}", false, tenant, It.IsAny<CancellationToken>()), Times.Once);
+        repository.Verify(x => x.CreateAsync(It.Is<FileStorageAggregate>(a => a.Tenant == tenant && a.Target == target), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    /// <summary>A platform folder is whatever the configuration says, not a fixed list (pendings/302).</summary>
+    [Fact]
+    public async Task Handle_ConfiguredPlatformTarget_StoresInPlatformContainer()
+    {
+        scope.PlatformTargets = ["shared-assets"];
+        var id = Guid.NewGuid();
+        fileStorage.Setup(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        await Handler().Handle(new StoreFileCommand(id, new MemoryStream([1, 2]), "logo.png", "shared-assets", tenant, uploadedBy), CancellationToken.None);
+        await Handler().Handle(new StoreFileCommand(Guid.NewGuid(), new MemoryStream([1, 2]), "me.png", "users", tenant, uploadedBy), CancellationToken.None);
+
+        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "logo.png", $"shared-assets/{id}", false, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
+        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "me.png", It.IsAny<string>(), false, tenant, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     /// <summary>Sin petición no hay nada que guardar.</summary>

@@ -6,6 +6,6 @@
     "202": "O armazenamento de arquivos não existe.",
     "203": "O arquivo não existe.",
     "204": "Não foi possível apagar os arquivos do condomínio: {0}",
-    "205": "Não é possível enviar arquivos para esse destino."
+    "205": "Essa pasta não é válida: use letras minúsculas, números e hífens, até 64 caracteres."
   }
 }

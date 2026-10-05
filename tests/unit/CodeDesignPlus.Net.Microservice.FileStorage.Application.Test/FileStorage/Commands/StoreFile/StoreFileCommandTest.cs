@@ -1,6 +1,8 @@
 using System.IO;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.StoreFile;
 using FluentValidation.TestHelper;
+using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStorage.Commands.StoreFile;
@@ -11,7 +13,7 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStora
 /// </summary>
 public class StoreFileCommandTest
 {
-    private readonly Validator validator = new();
+    private readonly Validator validator = new(Options.Create(new FileScopeOptions { PlatformTargets = ["users"] }));
 
     private static StoreFileCommand Valid() => new(Guid.NewGuid(), new MemoryStream([1, 2, 3]), "soat.pdf", "vehicle-documents", Guid.NewGuid(), Guid.NewGuid());
 
@@ -65,7 +67,7 @@ public class StoreFileCommandTest
         validator.TestValidate(Valid() with { Tenant = Guid.Empty }).ShouldHaveValidationErrorFor(x => x.Tenant);
     }
 
-    /// <summary>Los targets de plataforma no son de ninguna copropiedad: pueden llegar sin ella.</summary>
+    /// <summary>Los targets de plataforma (los de la configuración) no son de ninguna copropiedad: pueden llegar sin ella.</summary>
     [Fact]
     public void Validator_PlatformTargetWithoutTenant_HasNoErrors()
     {

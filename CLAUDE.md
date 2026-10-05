@@ -50,7 +50,7 @@ The frontend **always** talks to this microservice; the cloud provider behind `I
 - `[DisableFormValueModelBinding]` (local attribute at the bottom of `FileStorageController.cs`) strips the form value providers so ASP.NET doesn't buffer the request body. Kestrel's `MaxRequestBodySize` is set to `null` in `Program.cs`; `FormOptions.MultipartBodyLengthLimit` is `long.MaxValue`. Don't re-enable form binding on this action.
 - `CreateFileStorageCommand`'s validator gates `Stream.Length > 0` only `When(x.Stream.CanSeek)` — `MultipartSection.Body` is non-seekable and would throw otherwise.
 - `Download`, the signed URLs and `Deactivate` load the aggregate with `FindVisibleAsync(id, sessionTenant)` (the session's condominium or a platform file in `Guid.Empty`) and use the blob stored on it (`FileScope.BlobOf`). Never call `IFileStorage` with a path passed in by the caller: the old `file`/`target` query params of `Download` are ignored (pendings/168).
-- Blobs live in `{tenant}/{target}/{id}/{original name}` (`FileScope.FolderFor`), so equal names never overwrite each other and `Renowned` is always false. Targets must be in `FileScope.AllowedTargets`; `users` is a platform target stored in the `Guid.Empty` container (pendings/167).
+- Blobs live in `{tenant}/{target}/{id}/{original name}` (`FileScope.FolderFor`), so equal names never overwrite each other and `Renowned` is always false. Any target with a safe name is accepted (`FileScope.IsValidTarget`: lowercase, digits and hyphens, up to 64); the service knows no product folders. Platform targets (stored in the `Guid.Empty` container, e.g. `users`) come from configuration, section `FileScope:PlatformTargets` (pendings/167, 302).
 
 ### Domain rules that are easy to trip over
 

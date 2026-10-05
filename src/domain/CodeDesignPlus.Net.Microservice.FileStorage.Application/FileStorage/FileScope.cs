@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
 
 /// <summary>
@@ -9,8 +11,8 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
 /// archivos con el mismo nombre ya no se pisan, y el nombre original se conserva para la descarga y los adjuntos.
 /// </para>
 /// <para>
-/// El contenedor es la copropiedad en sesión, salvo en los targets de plataforma (la foto de un usuario), que no son de
-/// ninguna copropiedad: viven en el contenedor de la plataforma (<see cref="Guid.Empty"/>), los ve cualquiera que tenga
+/// El contenedor es la copropiedad en sesión, salvo en las carpetas de plataforma que diga la configuración
+/// (<see cref="FileScopeOptions"/>), que no son de ninguna copropiedad: viven en el contenedor de la plataforma (<see cref="Guid.Empty"/>), los ve cualquiera que tenga
 /// el id y solo los desactiva quien los subió. Así la foto no depende de la copropiedad que estaba abierta al subirla, ni
 /// se borra cuando esa copropiedad se purga.
 /// </para>
@@ -18,44 +20,24 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
 public static class FileScope
 {
     /// <summary>
-    /// Targets cuyos archivos son de la plataforma, no de una copropiedad: la foto de un usuario y los adjuntos de las
-    /// plantillas de correo del sistema (las de cada copropiedad usan «email-templates»).
+    /// El formato de una carpeta: minúsculas, números y guiones, empezando por letra o número, hasta 64 caracteres.
     /// </summary>
-    public static readonly IReadOnlySet<string> PlatformTargets = new HashSet<string>(StringComparer.Ordinal)
-    {
-        "users",
-        "system-email-templates",
-    };
+    private static readonly Regex TargetFormat = new("^[a-z0-9][a-z0-9-]{0,63}$", RegexOptions.CultureInvariant, TimeSpan.FromMilliseconds(100));
 
     /// <summary>
-    /// Targets que acepta la subida. Uno nuevo se añade aquí y en la pantalla que lo usa.
+    /// Si la carpeta tiene un nombre seguro. Cualquier producto elige sus carpetas; el micro solo impide que una carpeta
+    /// salga de su sitio («..», «/», «\») o sea un nombre raro (pendings/302).
     /// </summary>
-    public static readonly IReadOnlySet<string> AllowedTargets = new HashSet<string>(StringComparer.Ordinal)
-    {
-        "users",
-        "common-areas",
-        "expense-invoices",
-        "email-templates",
-        "system-email-templates",
-        "quotation-documents",
-        "pqrs-attachments",
-        "infraction-evidence",
-        "infraction-appeal",
-        "lease-contracts",
-        "fee-exclusions",
-        "ownership-proofs",
-        "moving-inspections",
-        // Los documentos que el job de OCR de ms-vehicles guarda al registrar un vehículo (pendings/260). Llegan por gRPC.
-        "vehicle-documents",
-        // El PDF de la licencia que ms-licenses genera al aprobarse una compra (pendings/260). Llega por gRPC.
-        "licenses-pdf",
-    };
+    /// <param name="target">La carpeta de la subida.</param>
+    /// <returns><see langword="true"/> si el nombre es seguro.</returns>
+    public static bool IsValidTarget(string? target) => target is not null && TargetFormat.IsMatch(target);
 
     /// <summary>
-    /// El contenedor en que se guarda un archivo del target, según la copropiedad en sesión.
+    /// El contenedor en que se guarda un archivo de la carpeta: el de la plataforma si la configuración la marca como
+    /// de plataforma; si no, el de la copropiedad en sesión.
     /// </summary>
-    public static Guid TenantFor(string target, Guid sessionTenant)
-        => PlatformTargets.Contains(target) ? Guid.Empty : sessionTenant;
+    public static Guid TenantFor(string target, Guid sessionTenant, FileScopeOptions options)
+        => options.IsPlatformTarget(target) ? Guid.Empty : sessionTenant;
 
     /// <summary>
     /// La carpeta del blob: el target y, dentro, una por archivo.
