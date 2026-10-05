@@ -49,8 +49,6 @@ public static class FileScope
         "vehicle-documents",
         // El PDF de la licencia que ms-licenses genera al aprobarse una compra (pendings/260). Llega por gRPC.
         "licenses-pdf",
-        // El soporte de una consignación del efectivo de la caja (pendings/293), desde Contabilidad › Caja.
-        "cash-deposits",
     };
 
     /// <summary>
