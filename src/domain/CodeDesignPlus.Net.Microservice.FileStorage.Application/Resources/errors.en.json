@@ -6,6 +6,8 @@
     "202": "The file storage does not exist.",
     "203": "The file does not exist.",
     "204": "The tenant files could not be deleted: {0}",
-    "205": "That folder is not valid: use lowercase letters, numbers and hyphens, up to 64 characters."
+    "205": "That folder is not valid: use lowercase letters, numbers and hyphens, up to 64 characters.",
+    "206": "The file cannot be imported from that source.",
+    "207": "The file could not be copied from its source; try again."
   }
 }

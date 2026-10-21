@@ -17,6 +17,22 @@ public class FileScopeOptions
     /// </summary>
     public string[] PlatformTargets { get; set; } = [];
 
+    /// <summary>
+    /// Contenedores de la misma cuenta desde los que se puede importar un archivo (<c>ImportFileCommand</c>): los que llena
+    /// otro sistema, como el de las grabaciones de llamadas. Vacío, no se importa nada.
+    /// </summary>
+    /// <remarks>
+    /// Es una lista cerrada a propósito: el gRPC no pide token, y sin ella cualquiera dentro del clúster podría copiar a su
+    /// copropiedad el archivo de otra con solo nombrar su contenedor.
+    /// </remarks>
+    public string[] ImportSources { get; set; } = [];
+
+    /// <summary>Si se puede importar desde ese contenedor.</summary>
+    /// <param name="container">El contenedor de origen.</param>
+    /// <returns><see langword="true"/> si está en <see cref="ImportSources"/>.</returns>
+    public bool IsImportSource(string? container)
+        => container is not null && ImportSources.Contains(container, StringComparer.Ordinal);
+
     /// <summary>Si la carpeta es de la plataforma.</summary>
     /// <param name="target">La carpeta de la subida.</param>
     /// <returns><see langword="true"/> si está en <see cref="PlatformTargets"/>.</returns>

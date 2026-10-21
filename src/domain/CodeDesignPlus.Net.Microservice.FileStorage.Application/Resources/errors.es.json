@@ -6,6 +6,8 @@
     "202": "El almacenamiento de archivos no existe.",
     "203": "El archivo no existe.",
     "204": "No se pudieron borrar los archivos de la copropiedad: {0}",
-    "205": "Esa carpeta no es válida: usa minúsculas, números y guiones, hasta 64 caracteres."
+    "205": "Esa carpeta no es válida: usa minúsculas, números y guiones, hasta 64 caracteres.",
+    "206": "No se puede importar el archivo desde ese origen.",
+    "207": "No se pudo copiar el archivo desde su origen; inténtalo de nuevo."
   }
 }

@@ -16,4 +16,15 @@ public class Errors : IErrorCodes
     /// El target de la subida no está en la lista de targets permitidos.
     /// </summary>
     public static readonly Error InvalidTarget = new("205");
+
+    /// <summary>
+    /// La importación pide un contenedor de origen que el despliegue no declara en <c>FileScope:ImportSources</c>, o una
+    /// ruta que sale de él.
+    /// </summary>
+    public static readonly Error ImportSourceNotAllowed = new("206");
+
+    /// <summary>
+    /// El almacenamiento no pudo copiar el archivo que se importa: no existe en el origen o la copia no terminó.
+    /// </summary>
+    public static readonly Error ImportFailed = new("207");
 }

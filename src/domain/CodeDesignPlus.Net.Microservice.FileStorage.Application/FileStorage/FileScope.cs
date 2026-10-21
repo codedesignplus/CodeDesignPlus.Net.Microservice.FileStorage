@@ -33,6 +33,18 @@ public static class FileScope
     public static bool IsValidTarget(string? target) => target is not null && TargetFormat.IsMatch(target);
 
     /// <summary>
+    /// Si la ruta de un archivo que se importa se queda dentro de su contenedor: relativa, sin «..» y con «/» como
+    /// separador.
+    /// </summary>
+    /// <param name="path">La ruta dentro del contenedor de origen.</param>
+    /// <returns><see langword="true"/> si la ruta es segura.</returns>
+    public static bool IsValidImportPath(string? path)
+        => !string.IsNullOrWhiteSpace(path)
+            && !path.StartsWith('/')
+            && !path.Contains('\\')
+            && !path.Split('/').Any(segment => segment is "" or "." or "..");
+
+    /// <summary>
     /// El contenedor en que se guarda un archivo de la carpeta: el de la plataforma si la configuración la marca como
     /// de plataforma; si no, el de la copropiedad en sesión.
     /// </summary>
