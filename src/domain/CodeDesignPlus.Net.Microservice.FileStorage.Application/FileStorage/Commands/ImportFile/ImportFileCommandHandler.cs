@@ -51,12 +51,18 @@ public class ImportFileCommandHandler(IFileStorageRepository repository, IPubSub
 
         var failed = responses.Length == 0 || responses.Any(x => !x.Success);
 
+        // La causa viaja también en el error: el worker que importa la deja en su reintento y en la cola de muertos, y el log
+        // de este servicio no siempre está a mano.
+        var cause = responses.Length == 0
+            ? "no file storage provider is enabled"
+            : string.Join("; ", responses.Where(x => !x.Success).Select(x => $"{x.Provider}: {x.Message}"));
+
         if (failed)
         {
-            logger.LogWarning("Import of {SourcePath} from {SourceContainer} as file {Id} failed: {Messages}", request.SourcePath, request.SourceContainer, request.Id, string.Join("; ", responses.Select(x => $"{x.Provider}: {x.Message}")));
+            logger.LogWarning("Import of {SourcePath} from {SourceContainer} as file {Id} failed: {Cause}", request.SourcePath, request.SourceContainer, request.Id, cause);
         }
 
-        ApplicationGuard.IsTrue(failed, Errors.ImportFailed);
+        ApplicationGuard.IsTrue(failed, Errors.ImportFailed.With(cause));
 
         var isNew = aggregate is null;
 

@@ -24,7 +24,8 @@ public class Errors : IErrorCodes
     public static readonly Error ImportSourceNotAllowed = new("206");
 
     /// <summary>
-    /// El almacenamiento no pudo copiar el archivo que se importa: no existe en el origen o la copia no terminó.
+    /// El almacenamiento no pudo copiar el archivo que se importa: no existe en el origen o la copia no terminó. Lleva la
+    /// causa que dio el almacenamiento (<c>{0}</c>), para que quien importa la vea en el error y no solo en el log.
     /// </summary>
     public static readonly Error ImportFailed = new("207");
 }

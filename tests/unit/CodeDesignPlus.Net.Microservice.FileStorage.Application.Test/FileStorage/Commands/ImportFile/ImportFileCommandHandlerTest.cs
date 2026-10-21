@@ -114,18 +114,20 @@ public class ImportFileCommandHandlerTest
     }
 
     /// <summary>
-    /// Si la copia falla no hay registro y el origen se queda, para que el siguiente intento vuelva a copiar.
+    /// Si la copia falla no hay registro y el origen se queda, para que el siguiente intento vuelva a copiar. El error lleva
+    /// la causa que dio el almacenamiento: sin ella, quien importa solo sabía que «no se pudo copiar».
     /// </summary>
     [Fact]
-    public async Task Handle_CopyFails_ThrowsImportFailedAndKeepsTheSource()
+    public async Task Handle_CopyFails_ThrowsImportFailedWithTheCauseAndKeepsTheSource()
     {
         fileStorage
             .Setup(x => x.ImportAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync([new M.Response(new M.File(Name), TypeProviders.AzureBlobProvider) { Success = false, Message = "missing" }]);
+            .ReturnsAsync([new M.Response(new M.File(Name), TypeProviders.AzureBlobProvider) { Success = false, Message = "NullReferenceException: Object reference not set to an instance of an object." }]);
 
         var exception = await Assert.ThrowsAsync<CodeDesignPlusException>(() => Handler().Handle(Command(), CancellationToken.None));
 
         Assert.Equal(Errors.ImportFailed.GetCode(), exception.Code);
+        Assert.Contains("AzureBlobProvider: NullReferenceException: Object reference not set to an instance of an object.", exception.Message);
         repository.Verify(x => x.CreateAsync(It.IsAny<FileStorageAggregate>(), It.IsAny<CancellationToken>()), Times.Never);
         fileStorage.Verify(x => x.DeleteImportSourceAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
     }
