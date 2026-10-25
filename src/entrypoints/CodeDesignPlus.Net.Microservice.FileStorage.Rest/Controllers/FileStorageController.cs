@@ -102,7 +102,8 @@ public class FileStorageController(IMediator mediator) : ControllerBase
     ///
     /// The <c>Content-Disposition</c> header is set to <c>inline</c> when <paramref name="viewInBrowser"/>
     /// is <see langword="true"/> (renders in the browser tab) or <c>attachment</c> otherwise (triggers
-    /// a file-save dialog). The filename used is <c>FileDetail.FullName</c> from the aggregate.
+    /// a file-save dialog). The filename used is <c>FileDetail.FullName</c> from the aggregate, in <c>filename*</c> with an
+    /// ASCII fallback in <c>filename</c> (see <see cref="DownloadContentDisposition"/>).
     /// </remarks>
     /// <param name="id">The <see cref="Guid"/> of the owning <c>FileStorageAggregate</c>.</param>
     /// <param name="file">The full name (name + extension) of the file to download, as stored in <c>FileDetail.FullName</c>.</param>
@@ -130,8 +131,8 @@ public class FileStorageController(IMediator mediator) : ControllerBase
 
         var result = await mediator.Send(query, cancellationToken);
 
-        var contentDisposition = viewInBrowser ? "inline" : "attachment";
-        Response.Headers.Append("Content-Disposition", $"{contentDisposition}; filename=\"{result.File.FullName}\"");
+        // El nombre va codificado: Kestrel no escribe una cabecera con tildes y la descarga respondía 500 (pendings/526).
+        Response.Headers.Append("Content-Disposition", DownloadContentDisposition.For(viewInBrowser, result.File.FullName));
 
         return File(result.Stream, result.File.Mime.MimeType);
     }
