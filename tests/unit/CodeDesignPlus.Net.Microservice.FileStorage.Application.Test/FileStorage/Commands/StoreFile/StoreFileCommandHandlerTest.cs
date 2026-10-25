@@ -56,6 +56,38 @@ public class StoreFileCommandHandlerTest
     }
 
     /// <summary>
+    /// Un archivo sin extensión o de un tipo que el catálogo MIME no conoce no llega al almacenamiento: el registro lo
+    /// rechazaría después de subirlo y el blob quedaría sin registro (Kappali pendings/526).
+    /// </summary>
+    [Theory]
+    [InlineData("README")]
+    [InlineData("recording.acsraw")]
+    public async Task Handle_FileTypeTheRecordRejects_ThrowsBeforeUploading(string fileName)
+    {
+        var command = new StoreFileCommand(Guid.NewGuid(), new MemoryStream([1, 2]), fileName, "documents", tenant, uploadedBy);
+
+        var exception = await Assert.ThrowsAsync<CodeDesignPlusException>(() => Handler().Handle(command, CancellationToken.None));
+
+        Assert.Equal(Errors.FileTypeNotAccepted.GetCode(), exception.Code);
+        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Un nombre con tildes, eñe o paréntesis se acepta tal cual (Kappali pendings/526).
+    /// </summary>
+    [Fact]
+    public async Task Handle_NameWithAccentsAndParentheses_IsUploadedWithItsName()
+    {
+        var id = Guid.NewGuid();
+        fileStorage.Setup(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        await Handler().Handle(new StoreFileCommand(id, new MemoryStream([1, 2]), "Cotización (1).pdf", "quotations", tenant, uploadedBy), CancellationToken.None);
+
+        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "Cotización (1).pdf", $"quotations/{id}", false, tenant, It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    /// <summary>
     /// Any safe name is accepted without the service knowing it beforehand, and a folder that is not a platform one is
     /// stored in the condominium in session (pendings/302).
     /// </summary>

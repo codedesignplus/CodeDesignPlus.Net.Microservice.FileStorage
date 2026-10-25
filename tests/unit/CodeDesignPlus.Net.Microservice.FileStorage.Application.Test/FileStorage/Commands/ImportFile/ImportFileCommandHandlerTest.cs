@@ -85,6 +85,23 @@ public class ImportFileCommandHandlerTest
     }
 
     /// <summary>
+    /// Un archivo de un tipo que el registro no acepta no se copia: quedaba el blob copiado y sin registro (Kappali
+    /// pendings/526).
+    /// </summary>
+    [Theory]
+    [InlineData("recording")]
+    [InlineData("recording.acsraw")]
+    public async Task Handle_FileTypeTheRecordRejects_ThrowsBeforeCopying(string fileName)
+    {
+        var command = new ImportFileCommand(id, Source, SourcePath, fileName, Target, tenant, uploadedBy);
+
+        var exception = await Assert.ThrowsAsync<CodeDesignPlusException>(() => Handler().Handle(command, CancellationToken.None));
+
+        Assert.Equal(Errors.FileTypeNotAccepted.GetCode(), exception.Code);
+        fileStorage.Verify(x => x.ImportAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    /// <summary>
     /// La copia queda en <c>{target}/{id}/{nombre}</c> de la copropiedad, nace el registro a nombre de quien importa y
     /// solo después se borra el origen.
     /// </summary>

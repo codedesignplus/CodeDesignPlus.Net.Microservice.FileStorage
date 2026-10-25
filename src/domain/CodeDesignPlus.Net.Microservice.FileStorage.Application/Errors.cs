@@ -28,4 +28,10 @@ public class Errors : IErrorCodes
     /// causa que dio el almacenamiento (<c>{0}</c>), para que quien importa la vea en el error y no solo en el log.
     /// </summary>
     public static readonly Error ImportFailed = new("207");
+
+    /// <summary>
+    /// El archivo no tiene extensión o es de un tipo que el catálogo MIME no conoce: el registro no lo aceptaría, y se
+    /// rechaza antes de subirlo o copiarlo para no dejar un archivo sin registro (Kappali pendings/526).
+    /// </summary>
+    public static readonly Error FileTypeNotAccepted = new("208");
 }

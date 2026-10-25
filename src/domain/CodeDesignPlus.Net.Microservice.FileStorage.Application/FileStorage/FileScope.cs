@@ -52,6 +52,24 @@ public static class FileScope
         => options.IsPlatformTarget(target) ? Guid.Empty : sessionTenant;
 
     /// <summary>
+    /// Si el registro aceptará el archivo: tiene extensión y el catálogo MIME conoce su tipo. Se mira antes de subirlo o de
+    /// copiarlo; si no, el blob quedaba en el almacenamiento y el registro lo rechazaba después (Kappali pendings/526).
+    /// </summary>
+    /// <param name="fileName">El nombre del archivo, con su extensión.</param>
+    /// <returns><see langword="true"/> si el archivo se puede registrar.</returns>
+    public static bool IsAcceptedFile(string? fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+        {
+            return false;
+        }
+
+        var file = new CodeDesignPlus.Net.File.Storage.Abstractions.Models.File(fileName);
+
+        return !string.IsNullOrEmpty(file.Extension) && file.Mime is not null;
+    }
+
+    /// <summary>
     /// La carpeta del blob: el target y, dentro, una por archivo.
     /// </summary>
     public static string FolderFor(string target, Guid id) => $"{target}/{id}";

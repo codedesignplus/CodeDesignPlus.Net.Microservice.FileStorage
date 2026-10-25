@@ -34,6 +34,7 @@ public class ImportFileCommandHandler(IFileStorageRepository repository, IPubSub
         ApplicationGuard.IsFalse(FileScope.IsValidTarget(request.Target), Errors.InvalidTarget);
         ApplicationGuard.IsFalse(scope.Value.IsImportSource(request.SourceContainer), Errors.ImportSourceNotAllowed);
         ApplicationGuard.IsFalse(FileScope.IsValidImportPath(request.SourcePath), Errors.ImportSourceNotAllowed);
+        ApplicationGuard.IsFalse(FileScope.IsAcceptedFile(request.File), Errors.FileTypeNotAccepted);
 
         var tenant = FileScope.TenantFor(request.Target, request.Tenant, scope.Value);
 

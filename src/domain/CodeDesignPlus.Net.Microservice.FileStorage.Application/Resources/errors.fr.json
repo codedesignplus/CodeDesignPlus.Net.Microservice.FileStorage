@@ -8,6 +8,7 @@
     "204": "Les fichiers de la copropriété n'ont pas pu être supprimés : {0}",
     "205": "Ce dossier n'est pas valide : utilisez des minuscules, des chiffres et des tirets, 64 caractères au maximum.",
     "206": "Le fichier ne peut pas être importé depuis cette source.",
-    "207": "Le fichier n'a pas pu être copié depuis sa source ; réessayez. Cause : {0}"
+    "207": "Le fichier n'a pas pu être copié depuis sa source ; réessayez. Cause : {0}",
+    "208": "Le fichier doit avoir une extension d’un type connu (par exemple .pdf, .jpg ou .mp4)."
   }
 }

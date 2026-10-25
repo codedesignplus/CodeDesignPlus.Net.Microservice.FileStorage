@@ -8,6 +8,7 @@
     "204": "The tenant files could not be deleted: {0}",
     "205": "That folder is not valid: use lowercase letters, numbers and hyphens, up to 64 characters.",
     "206": "The file cannot be imported from that source.",
-    "207": "The file could not be copied from its source; try again. Cause: {0}"
+    "207": "The file could not be copied from its source; try again. Cause: {0}",
+    "208": "The file must have an extension of a known type (for example .pdf, .jpg or .mp4)."
   }
 }

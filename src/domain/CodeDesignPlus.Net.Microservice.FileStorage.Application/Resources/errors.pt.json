@@ -8,6 +8,7 @@
     "204": "Não foi possível apagar os arquivos do condomínio: {0}",
     "205": "Essa pasta não é válida: use letras minúsculas, números e hífens, até 64 caracteres.",
     "206": "Não é possível importar o arquivo dessa origem.",
-    "207": "Não foi possível copiar o arquivo da origem; tente novamente. Causa: {0}"
+    "207": "Não foi possível copiar o arquivo da origem; tente novamente. Causa: {0}",
+    "208": "O arquivo deve ter uma extensão de um tipo conhecido (por exemplo .pdf, .jpg ou .mp4)."
   }
 }

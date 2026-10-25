@@ -13,6 +13,7 @@ public class StoreFileCommandHandler(IFileStorageRepository repository, IPubSub 
         ApplicationGuard.IsNull(request, Errors.InvalidRequest);
 
         ApplicationGuard.IsFalse(FileScope.IsValidTarget(request.Target), Errors.InvalidTarget);
+        ApplicationGuard.IsFalse(FileScope.IsAcceptedFile(request.File), Errors.FileTypeNotAccepted);
 
         var tenant = FileScope.TenantFor(request.Target, request.Tenant, scope.Value);
 
