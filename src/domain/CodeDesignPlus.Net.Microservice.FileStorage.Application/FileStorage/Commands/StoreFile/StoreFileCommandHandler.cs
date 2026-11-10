@@ -17,7 +17,7 @@ public class StoreFileCommandHandler(IFileStorageRepository repository, IPubSub 
 
         var tenant = FileScope.TenantFor(request.Target, request.Tenant, scope.Value);
 
-        var aggregate = await repository.FindAsync<FileStorageAggregate>(request.Id, tenant, cancellationToken);
+        var aggregate = await repository.FindInContainerAsync(request.Id, tenant, cancellationToken);
         var isNew = aggregate == null;
 
         aggregate ??= FileStorageAggregate.Create(request.Id, request.File, request.Target, tenant, request.UploadedBy);

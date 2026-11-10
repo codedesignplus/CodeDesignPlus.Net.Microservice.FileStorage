@@ -38,7 +38,7 @@ public class ImportFileCommandHandler(IFileStorageRepository repository, IPubSub
 
         var tenant = FileScope.TenantFor(request.Target, request.Tenant, scope.Value);
 
-        var aggregate = await repository.FindAsync<FileStorageAggregate>(request.Id, tenant, cancellationToken);
+        var aggregate = await repository.FindInContainerAsync(request.Id, tenant, cancellationToken);
 
         if (aggregate is not null && aggregate.Files.Count > 0)
         {

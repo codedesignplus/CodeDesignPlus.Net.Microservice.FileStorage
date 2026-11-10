@@ -21,4 +21,26 @@ public interface IFileStorageRepository : IRepositoryBase
     /// <see cref="Guid.Empty"/>). Nunca el de otra copropiedad (pendings/168).
     /// </summary>
     Task<FileStorageAggregate?> FindVisibleAsync(Guid id, Guid sessionTenant, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Busca un archivo en un contenedor exacto: el de una copropiedad o el de la plataforma (<see cref="Guid.Empty"/>).
+    /// </summary>
+    /// <remarks>
+    /// Es la búsqueda de quien escribe (subir, importar, soltar). La del SDK por tenant exige un tenant y rechaza
+    /// <see cref="Guid.Empty"/>, que aquí es un contenedor válido: con ella ningún archivo de plataforma llegaba a crearse.
+    /// </remarks>
+    /// <param name="id">El id del archivo.</param>
+    /// <param name="container">La copropiedad dueña, o <see cref="Guid.Empty"/> para la plataforma.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    /// <returns>El archivo no borrado de ese contenedor, o null.</returns>
+    Task<FileStorageAggregate?> FindInContainerAsync(Guid id, Guid container, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Borra del todo el registro de un archivo de un contenedor exacto, también el de la plataforma, esté o no
+    /// desactivado o borrado (es la limpieza de los archivos desactivados).
+    /// </summary>
+    /// <param name="id">El id del archivo.</param>
+    /// <param name="container">La copropiedad dueña, o <see cref="Guid.Empty"/> para la plataforma.</param>
+    /// <param name="cancellationToken">Token de cancelación.</param>
+    Task DeleteFromContainerAsync(Guid id, Guid container, CancellationToken cancellationToken);
 }

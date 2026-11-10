@@ -32,7 +32,7 @@ public class ReleaseFilesHandlerTest
         aggregate.GetAndClearEvents();
 
         repository
-            .Setup(r => r.FindAsync<FileStorageAggregate>(aggregate.Id, ownerTenant, It.IsAny<CancellationToken>()))
+            .Setup(r => r.FindInContainerAsync(aggregate.Id, ownerTenant, It.IsAny<CancellationToken>()))
             .ReturnsAsync(aggregate);
 
         return aggregate;

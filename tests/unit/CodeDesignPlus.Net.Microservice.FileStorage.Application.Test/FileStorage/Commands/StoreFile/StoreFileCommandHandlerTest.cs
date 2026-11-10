@@ -148,7 +148,7 @@ public class StoreFileCommandHandlerTest
 
         await Handler().Handle(new StoreFileCommand(id, new MemoryStream([1, 2]), name, target, tenant, uploadedBy), CancellationToken.None);
 
-        repository.Verify(x => x.FindAsync<FileStorageAggregate>(id, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
+        repository.Verify(x => x.FindInContainerAsync(id, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
         fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), name, $"{target}/{id}", false, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
         repository.Verify(x => x.CreateAsync(It.Is<FileStorageAggregate>(a => a.Tenant == Guid.Empty), It.IsAny<CancellationToken>()), Times.Once);
     }
@@ -192,7 +192,7 @@ public class StoreFileCommandHandlerTest
         var id = Guid.NewGuid();
         var existing = FileStorageAggregate.Create(id, "license.pdf", "licenses-pdf", tenant, Guid.NewGuid());
         existing.GetAndClearEvents();
-        repository.Setup(x => x.FindAsync<FileStorageAggregate>(id, tenant, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
+        repository.Setup(x => x.FindInContainerAsync(id, tenant, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
         var (response, file) = Uploaded("license.pdf", $"licenses-pdf/{id}");
         fileStorage.Setup(x => x.UploadAsync(It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync([response]);

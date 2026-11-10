@@ -76,7 +76,8 @@ public class FileStorageCleanupJob(
                         cancellationToken.ShutdownToken);
                 }
 
-                await repository.DeleteAsync<FileStorageAggregate>(aggregate.Id, cancellationToken.ShutdownToken);
+                // En su contenedor: el borrado del SDK sin tenant lo rechazaba con cualquier archivo.
+                await repository.DeleteFromContainerAsync(aggregate.Id, aggregate.Tenant, cancellationToken.ShutdownToken);
 
                 deletedCount++;
 

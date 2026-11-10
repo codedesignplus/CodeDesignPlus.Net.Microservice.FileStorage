@@ -175,7 +175,7 @@ public class ImportFileCommandHandlerTest
         var existing = FileStorageAggregate.Create(id, Name, Target, tenant, uploadedBy);
         existing.AddFile(Imported().File, uploadedBy);
         existing.GetAndClearEvents();
-        repository.Setup(x => x.FindAsync<FileStorageAggregate>(id, tenant, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
+        repository.Setup(x => x.FindInContainerAsync(id, tenant, It.IsAny<CancellationToken>())).ReturnsAsync(existing);
 
         var result = await Handler().Handle(Command(), CancellationToken.None);
 

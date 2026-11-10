@@ -24,7 +24,7 @@ public class ReleaseFilesHandler(IFileStorageRepository repository, IPubSub pubs
     {
         foreach (var id in data.Files)
         {
-            var aggregate = await repository.FindAsync<FileStorageAggregate>(id, data.Tenant, token);
+            var aggregate = await repository.FindInContainerAsync(id, data.Tenant, token);
 
             if (aggregate is null || !aggregate.IsActive)
             {
