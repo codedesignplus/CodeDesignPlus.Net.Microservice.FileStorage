@@ -23,6 +23,7 @@ public class PurgeTenantDataHandlerTest
     private readonly Mock<IFileStorageRepository> repository = new();
     private readonly Mock<IFileStorage> fileStorage = new();
     private readonly List<string> calls = [];
+    private static readonly Guid PlatformContainer = Guid.Parse("00000000-f11e-0000-0000-000000000001");
     private readonly Guid tenant = Guid.NewGuid();
     private readonly PurgeTenantDataHandler handler;
 
@@ -33,7 +34,7 @@ public class PurgeTenantDataHandlerTest
             .Callback(() => calls.Add("documents"))
             .ReturnsAsync(3);
 
-        handler = new PurgeTenantDataHandler(repository.Object, fileStorage.Object, Mock.Of<ILogger<PurgeTenantDataHandler>>());
+        handler = new PurgeTenantDataHandler(repository.Object, fileStorage.Object, Microsoft.Extensions.Options.Options.Create(new CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.FileScopeOptions { PlatformContainer = PlatformContainer }), Mock.Of<ILogger<PurgeTenantDataHandler>>());
     }
 
     private void FilesDeleted(params bool[] success)
@@ -72,6 +73,16 @@ public class PurgeTenantDataHandlerTest
             .ToHashSet();
 
         Assert.Empty(TypesWithTenant().Except(purged).Select(type => type.Name));
+    }
+
+    [Fact]
+    public async Task HandleAsync_IdOfThePlatformContainer_RefusesAndDeletesNothing()
+    {
+        // Act
+        await Assert.ThrowsAsync<CodeDesignPlusException>(() => handler.HandleAsync(TenantPurgedDomainEvent.Create(PlatformContainer, "Plataforma"), CancellationToken.None));
+
+        // Assert
+        Assert.Empty(calls);
     }
 
     [Fact]

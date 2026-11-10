@@ -141,7 +141,7 @@ public class PlatformContainerTest
         await Deactivate(platform, Guid.Empty, Instant.FromUtc(2020, 1, 1, 0, 0));
         await Deactivate(ofTenant, tenant, Instant.FromUtc(2020, 1, 1, 0, 0));
 
-        var job = new FileStorageCleanupJob(repository, storage.Object, NullLogger<FileStorageCleanupJob>.Instance);
+        var job = new FileStorageCleanupJob(repository, storage.Object, Options.Create(new FileScopeOptions { PlatformTargets = [PlatformTarget], PlatformContainer = Guid.Parse("00000000-f11e-0000-0000-000000000001") }), NullLogger<FileStorageCleanupJob>.Instance);
 
         // Act
         await job.ExecuteAsync(new JobCancellationToken(false));

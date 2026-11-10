@@ -1,8 +1,9 @@
 using CodeDesignPlus.Net.File.Storage.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Queries.Download;
 
-public class DownloadQueryHandler(IFileStorageRepository repository, IUserContext user, IFileStorage fileStorage) : IRequestHandler<DownloadQuery, File.Storage.Abstractions.Models.Response>
+public class DownloadQueryHandler(IFileStorageRepository repository, IUserContext user, IFileStorage fileStorage, IOptions<FileScopeOptions> scope) : IRequestHandler<DownloadQuery, File.Storage.Abstractions.Models.Response>
 {
     public async Task<File.Storage.Abstractions.Models.Response> Handle(DownloadQuery request, CancellationToken cancellationToken)
     {
@@ -19,7 +20,7 @@ public class DownloadQueryHandler(IFileStorageRepository repository, IUserContex
 
         var (name, folder) = FileScope.BlobOf(stored!, aggregate.Target);
 
-        var file = await fileStorage.DownloadAsync(name, folder, aggregate.Tenant, cancellationToken);
+        var file = await fileStorage.DownloadAsync(name, folder, scope.Value.ContainerOf(aggregate.Tenant), cancellationToken);
 
         // Si el aggregate existe pero el `file`/`target` no resuelve a un blob real (p. ej. el caller
         // pasó el name sin extensión), la SDK devuelve un Response sin File/Stream poblados.

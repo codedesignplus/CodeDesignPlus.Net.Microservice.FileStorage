@@ -26,7 +26,9 @@ public class StoreFileCommandHandlerTest
     private readonly Guid tenant = Guid.NewGuid();
     private readonly Guid uploadedBy = Guid.NewGuid();
 
-    private readonly FileScopeOptions scope = new() { PlatformTargets = ["users", "system-email-templates"] };
+    private static readonly Guid PlatformContainer = Guid.Parse("00000000-f11e-0000-0000-000000000001");
+
+    private readonly FileScopeOptions scope = new() { PlatformTargets = ["users", "system-email-templates"], PlatformContainer = PlatformContainer };
 
     private StoreFileCommandHandler Handler() => new(repository.Object, pubsub.Object, fileStorage.Object, mapper.Object, Options.Create(scope));
 
@@ -120,7 +122,7 @@ public class StoreFileCommandHandlerTest
         await Handler().Handle(new StoreFileCommand(id, new MemoryStream([1, 2]), "logo.png", "shared-assets", tenant, uploadedBy), CancellationToken.None);
         await Handler().Handle(new StoreFileCommand(Guid.NewGuid(), new MemoryStream([1, 2]), "me.png", "users", tenant, uploadedBy), CancellationToken.None);
 
-        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "logo.png", $"shared-assets/{id}", false, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
+        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "logo.png", $"shared-assets/{id}", false, PlatformContainer, It.IsAny<CancellationToken>()), Times.Once);
         fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), "me.png", It.IsAny<string>(), false, tenant, It.IsAny<CancellationToken>()), Times.Once);
     }
 
@@ -149,7 +151,7 @@ public class StoreFileCommandHandlerTest
         await Handler().Handle(new StoreFileCommand(id, new MemoryStream([1, 2]), name, target, tenant, uploadedBy), CancellationToken.None);
 
         repository.Verify(x => x.FindInContainerAsync(id, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
-        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), name, $"{target}/{id}", false, Guid.Empty, It.IsAny<CancellationToken>()), Times.Once);
+        fileStorage.Verify(x => x.UploadAsync(It.IsAny<Stream>(), name, $"{target}/{id}", false, PlatformContainer, It.IsAny<CancellationToken>()), Times.Once);
         repository.Verify(x => x.CreateAsync(It.Is<FileStorageAggregate>(a => a.Tenant == Guid.Empty), It.IsAny<CancellationToken>()), Times.Once);
     }
 

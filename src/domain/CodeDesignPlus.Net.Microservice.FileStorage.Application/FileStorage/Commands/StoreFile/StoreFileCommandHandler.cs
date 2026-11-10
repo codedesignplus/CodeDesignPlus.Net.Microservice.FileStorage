@@ -24,7 +24,7 @@ public class StoreFileCommandHandler(IFileStorageRepository repository, IPubSub 
 
         // Cada archivo en su carpeta: {target}/{id}/{nombre original}. Con la carpeta por id el nombre ya no choca con
         // el de otro archivo, así que nunca se renombra (pendings/167).
-        var response = await fileStorage.UploadAsync(request.Stream, request.File, FileScope.FolderFor(request.Target, request.Id), false, tenant, cancellationToken);
+        var response = await fileStorage.UploadAsync(request.Stream, request.File, FileScope.FolderFor(request.Target, request.Id), false, scope.Value.ContainerOf(tenant), cancellationToken);
 
         string? storedName = null;
 

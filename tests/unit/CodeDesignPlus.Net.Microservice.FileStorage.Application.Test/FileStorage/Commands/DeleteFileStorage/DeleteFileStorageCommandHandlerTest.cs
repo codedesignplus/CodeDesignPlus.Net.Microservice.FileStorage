@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using CodeDesignPlus.Net.File.Storage.Abstractions;
+using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.DeleteFileStorage;
 using Moq;
 using Xunit;
@@ -26,7 +27,8 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.Test.FileStora
                 repositoryMock.Object,
                 fileStorageMock.Object,
                 userContextMock.Object,
-                pubSubMock.Object
+                pubSubMock.Object,
+                Microsoft.Extensions.Options.Options.Create(new FileScopeOptions { PlatformContainer = Guid.Parse("00000000-f11e-0000-0000-000000000001") })
             );
         }
 

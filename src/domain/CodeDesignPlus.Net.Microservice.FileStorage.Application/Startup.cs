@@ -13,7 +13,11 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application
             MapsterConfigFileStorage.Configure();
 
             // Qué carpetas son de la plataforma lo dice el despliegue, no el código (pendings/302).
-            services.Configure<FileScopeOptions>(configuration.GetSection(FileScopeOptions.Section));
+            services
+                .AddOptions<FileScopeOptions>()
+                .Bind(configuration.GetSection(FileScopeOptions.Section))
+                .Validate(x => x.PlatformContainer != Guid.Empty, "FileScope:PlatformContainer is required: the storage refuses an empty container.")
+                .ValidateOnStart();
         }
     }
 }

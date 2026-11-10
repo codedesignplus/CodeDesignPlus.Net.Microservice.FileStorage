@@ -12,7 +12,7 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
 /// </para>
 /// <para>
 /// El contenedor es la copropiedad en sesión, salvo en las carpetas de plataforma que diga la configuración
-/// (<see cref="FileScopeOptions"/>), que no son de ninguna copropiedad: viven en el contenedor de la plataforma (<see cref="Guid.Empty"/>), los ve cualquiera que tenga
+/// (<see cref="FileScopeOptions"/>), que no son de ninguna copropiedad: su registro lleva <see cref="Guid.Empty"/> como copropiedad y su blob vive en el contenedor de la plataforma (<see cref="FileScopeOptions.PlatformContainer"/>), los ve cualquiera que tenga
 /// el id y solo los desactiva quien los subió. Así la foto no depende de la copropiedad que estaba abierta al subirla, ni
 /// se borra cuando esa copropiedad se purga.
 /// </para>

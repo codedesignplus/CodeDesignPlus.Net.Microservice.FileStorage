@@ -1,8 +1,9 @@
 using CodeDesignPlus.Net.File.Storage.Abstractions;
+using Microsoft.Extensions.Options;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.DeleteFileStorage;
 
-public class DeleteFileStorageCommandHandler(IFileStorageRepository repository, IFileStorage fileStorage, IUserContext user, IPubSub pubsub) : IRequestHandler<DeleteFileStorageCommand>
+public class DeleteFileStorageCommandHandler(IFileStorageRepository repository, IFileStorage fileStorage, IUserContext user, IPubSub pubsub, IOptions<FileScopeOptions> scope) : IRequestHandler<DeleteFileStorageCommand>
 {
     public async Task Handle(DeleteFileStorageCommand request, CancellationToken cancellationToken)
     {
@@ -22,7 +23,7 @@ public class DeleteFileStorageCommandHandler(IFileStorageRepository repository, 
         {
             var (name, folder) = FileScope.BlobOf(file, aggregate.Target);
 
-            await fileStorage.DeleteAsync(name, folder, aggregate.Tenant, cancellationToken);
+            await fileStorage.DeleteAsync(name, folder, scope.Value.ContainerOf(aggregate.Tenant), cancellationToken);
         }
 
         await pubsub.PublishAsync(aggregate.GetAndClearEvents(), cancellationToken);

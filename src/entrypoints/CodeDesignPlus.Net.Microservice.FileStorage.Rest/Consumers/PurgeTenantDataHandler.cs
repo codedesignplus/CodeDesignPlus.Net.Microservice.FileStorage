@@ -1,5 +1,7 @@
 using CodeDesignPlus.Net.Exceptions.Guards;
 using CodeDesignPlus.Net.File.Storage.Abstractions;
+using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
+using Microsoft.Extensions.Options;
 using CodeDesignPlus.Net.Microservice.FileStorage.Domain;
 using CodeDesignPlus.Net.Microservice.FileStorage.Domain.Repositories;
 using CodeDesignPlus.Net.Microservice.FileStorage.Rest.DomainEvents;
@@ -29,10 +31,14 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Rest.Consumers;
 /// </para>
 /// </remarks>
 [QueueName<FileStorageAggregate>("PurgeTenantDataHandler")]
-public class PurgeTenantDataHandler(IFileStorageRepository repository, IFileStorage fileStorage, ILogger<PurgeTenantDataHandler> logger) : IEventHandler<TenantPurgedDomainEvent>
+public class PurgeTenantDataHandler(IFileStorageRepository repository, IFileStorage fileStorage, IOptions<FileScopeOptions> scope, ILogger<PurgeTenantDataHandler> logger) : IEventHandler<TenantPurgedDomainEvent>
 {
     public async Task HandleAsync(TenantPurgedDomainEvent data, CancellationToken token)
     {
+        // El contenedor de la plataforma no es de ninguna copropiedad: una purga con su id se llevaría los archivos de
+        // la plataforma, así que se rechaza y el mensaje queda en la cola de muertos para revisarlo.
+        ApplicationGuard.IsTrue(data.AggregateId == scope.Value.PlatformContainer, Errors.TenantFilesNotDeleted.With("the platform container is not a tenant"));
+
         var responses = await fileStorage.DeleteTenantAsync(data.AggregateId, token);
 
         var failures = responses.Where(response => !response.Success).Select(response => $"{response.Provider}: {response.Message}").ToList();

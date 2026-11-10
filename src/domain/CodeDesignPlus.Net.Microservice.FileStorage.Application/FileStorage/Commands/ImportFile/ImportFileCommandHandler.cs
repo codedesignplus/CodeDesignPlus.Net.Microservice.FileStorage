@@ -48,7 +48,7 @@ public class ImportFileCommandHandler(IFileStorageRepository repository, IPubSub
             return Stored(aggregate, aggregate.Files[0].FileDetail?.FullName ?? request.File);
         }
 
-        var responses = await fileStorage.ImportAsync(request.SourceContainer, request.SourcePath, request.File, FileScope.FolderFor(request.Target, request.Id), tenant, cancellationToken);
+        var responses = await fileStorage.ImportAsync(request.SourceContainer, request.SourcePath, request.File, FileScope.FolderFor(request.Target, request.Id), scope.Value.ContainerOf(tenant), cancellationToken);
 
         var failed = responses.Length == 0 || responses.Any(x => !x.Success);
 

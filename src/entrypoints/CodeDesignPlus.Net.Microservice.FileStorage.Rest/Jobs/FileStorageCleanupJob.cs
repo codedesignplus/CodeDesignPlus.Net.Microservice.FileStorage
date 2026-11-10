@@ -1,4 +1,5 @@
 using CodeDesignPlus.Net.File.Storage.Abstractions;
+using Microsoft.Extensions.Options;
 using CodeDesignPlus.Net.Hangfire.Abstractions;
 using CodeDesignPlus.Net.Hangfire.Abstractions.Attributes;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage;
@@ -25,6 +26,7 @@ namespace CodeDesignPlus.Net.Microservice.FileStorage.Rest.Jobs;
 public class FileStorageCleanupJob(
     IFileStorageRepository repository,
     IFileStorage fileStorage,
+    IOptions<FileScopeOptions> scope,
     ILogger<FileStorageCleanupJob> logger) : IRecurrentJob
 {
     private const int RetentionDays = 30;
@@ -72,7 +74,7 @@ public class FileStorageCleanupJob(
                     await fileStorage.DeleteAsync(
                         name,
                         folder,
-                        aggregate.Tenant,
+                        scope.Value.ContainerOf(aggregate.Tenant),
                         cancellationToken.ShutdownToken);
                 }
 

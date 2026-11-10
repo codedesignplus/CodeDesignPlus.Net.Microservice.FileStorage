@@ -29,6 +29,7 @@ public class FileScopeHandlersTest
     private readonly Mock<IFileStorage> fileStorage = new();
 
     private readonly Guid tenant = Guid.NewGuid();
+    private readonly Microsoft.Extensions.Options.IOptions<FileScopeOptions> scope = Microsoft.Extensions.Options.Options.Create(new FileScopeOptions { PlatformContainer = Guid.Parse("00000000-f11e-0000-0000-000000000001") });
     private readonly Guid userId = Guid.NewGuid();
 
     public FileScopeHandlersTest()
@@ -77,7 +78,7 @@ public class FileScopeHandlersTest
     [Fact]
     public async Task Download_UsesStoredBlobOfTheRecord()
     {
-        var handler = new DownloadQueryHandler(repository.Object, user.Object, fileStorage.Object);
+        var handler = new DownloadQueryHandler(repository.Object, user.Object, fileStorage.Object, scope);
         var aggregate = WithStoredFile("photo.jpg", "common-areas");
         repository.Setup(x => x.FindVisibleAsync(aggregate.Id, tenant, It.IsAny<CancellationToken>())).ReturnsAsync(aggregate);
         var download = new File.Storage.Abstractions.Models.Response(new File.Storage.Abstractions.Models.File("photo.jpg"), TypeProviders.AzureBlobProvider) { Stream = new MemoryStream([1]) };
@@ -91,7 +92,7 @@ public class FileScopeHandlersTest
     [Fact]
     public async Task Download_InactiveFile_ThrowsFileNotFound()
     {
-        var handler = new DownloadQueryHandler(repository.Object, user.Object, fileStorage.Object);
+        var handler = new DownloadQueryHandler(repository.Object, user.Object, fileStorage.Object, scope);
         var aggregate = WithStoredFile("photo.jpg", "common-areas");
         aggregate.Delete(userId);
         repository.Setup(x => x.FindVisibleAsync(aggregate.Id, tenant, It.IsAny<CancellationToken>())).ReturnsAsync(aggregate);
@@ -107,7 +108,7 @@ public class FileScopeHandlersTest
     [Fact]
     public async Task Delete_RemovesTheStoredBlobNotTheOriginalName()
     {
-        var handler = new DeleteFileStorageCommandHandler(repository.Object, fileStorage.Object, user.Object, pubsub.Object);
+        var handler = new DeleteFileStorageCommandHandler(repository.Object, fileStorage.Object, user.Object, pubsub.Object, scope);
         var aggregate = WithStoredFile("photo.jpg", "common-areas");
         repository.Setup(x => x.FindVisibleAsync(aggregate.Id, tenant, It.IsAny<CancellationToken>())).ReturnsAsync(aggregate);
 

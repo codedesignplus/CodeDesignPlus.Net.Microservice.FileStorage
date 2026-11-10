@@ -1,9 +1,10 @@
 using CodeDesignPlus.Net.File.Storage.Abstractions;
 using CodeDesignPlus.Net.File.Storage.Abstractions.Models;
+using Microsoft.Extensions.Options;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Queries.GetSignedUrlById;
 
-public class GetSignedUrlByIdQueryHandler(IFileStorageRepository repository, IFileStorage fileStorage, IUserContext user) : IRequestHandler<GetSignedUrlByIdQuery, FileDetail>
+public class GetSignedUrlByIdQueryHandler(IFileStorageRepository repository, IFileStorage fileStorage, IUserContext user, IOptions<FileScopeOptions> scope) : IRequestHandler<GetSignedUrlByIdQuery, FileDetail>
 {
     public async Task<FileDetail> Handle(GetSignedUrlByIdQuery request, CancellationToken cancellationToken)
     {
@@ -20,7 +21,7 @@ public class GetSignedUrlByIdQueryHandler(IFileStorageRepository repository, IFi
 
         var (name, folder) = FileScope.BlobOf(stored!, aggregate.Target);
 
-        var response = await fileStorage.GetSignedUrlAsync(name, folder, TimeSpan.FromMinutes(5), aggregate.Tenant, cancellationToken);
+        var response = await fileStorage.GetSignedUrlAsync(name, folder, TimeSpan.FromMinutes(5), scope.Value.ContainerOf(aggregate.Tenant), cancellationToken);
 
         return response.File.Detail;
     }

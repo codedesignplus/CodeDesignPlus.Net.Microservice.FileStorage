@@ -1,5 +1,6 @@
 using CodeDesignPlus.Net.File.Storage.Abstractions;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.DataTransferObjects;
+using Microsoft.Extensions.Options;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Queries.GetFileStorageWithSignedUrls;
 
@@ -10,7 +11,8 @@ public class GetFileStorageWithSignedUrlsQueryHandler(
     IFileStorageRepository repository,
     IFileStorage fileStorage,
     IMapper mapper,
-    IUserContext userContext) : IRequestHandler<GetFileStorageWithSignedUrlsQuery, FileStorageDto>
+    IUserContext userContext,
+    IOptions<FileScopeOptions> scope) : IRequestHandler<GetFileStorageWithSignedUrlsQuery, FileStorageDto>
 {
     public async Task<FileStorageDto> Handle(GetFileStorageWithSignedUrlsQuery request, CancellationToken cancellationToken)
     {
@@ -41,7 +43,7 @@ public class GetFileStorageWithSignedUrlsQueryHandler(
                     metadata.File,
                     metadata.Target,
                     expiration,
-                    aggregate.Tenant,
+                    scope.Value.ContainerOf(aggregate.Tenant),
                     cancellationToken);
 
                 // Update metadata with signed URL information
