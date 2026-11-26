@@ -1,5 +1,6 @@
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.DataTransferObjects;
 using CodeDesignPlus.Net.Microservice.FileStorage.Application.FileStorage.Commands.DeactivateFileStorage;
+using CodeDesignPlus.Net.File.Storage.Abstractions.Models;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Rest.Controllers;
 
@@ -120,7 +121,7 @@ public class FileStorageController(IMediator mediator) : ControllerBase
     /// <response code="401">Missing or invalid bearer token.</response>
     /// <response code="404">No aggregate exists for the supplied <paramref name="id"/>.</response>
     [HttpGet("[action]/{id}")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType<Response>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
