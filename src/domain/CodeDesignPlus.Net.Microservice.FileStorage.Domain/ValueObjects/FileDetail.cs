@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using CodeDesignPlus.Net.File.Storage.Abstractions;
+using CodeDesignPlus.Net.Core.Abstractions.Attributes;
 
 namespace CodeDesignPlus.Net.Microservice.FileStorage.Domain.ValueObjects;
 
@@ -9,6 +10,7 @@ public sealed partial class FileDetail
     public string FullName { get;private set;  } = null!;
     public string Name { get; private set; } = null!;
     public Metadata Metadata { get; private set; } = null!;
+    [NotMoney]
     public long Size { get;private set;  } = 0;
     public string Version { get; private set; } = null!;
     public bool Renowned { get; private set; } = false;
